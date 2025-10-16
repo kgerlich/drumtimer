@@ -776,6 +776,11 @@
                     <input type="range" class="silence-slider" id="silenceSlider" min="0" max="100" value="10">
                     <span id="silenceDisplay">10%</span>
                 </div>
+                <div class="silence-probability" style="margin-top: 0.8rem;">
+                    <span>⏱️ Pause Length:</span>
+                    <input type="range" class="silence-slider" id="pauseLengthSlider" min="1" max="4" value="1">
+                    <span id="pauseLengthDisplay">1 bar</span>
+                </div>
                 <div style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem; opacity: 0.8;">
                     ℹ️ First bar always plays for clear timing reference
                 </div>
@@ -834,6 +839,7 @@
                 this.bpm = 80;
                 this.silentBars = [];
                 this.silenceProbability = 10;
+                this.silenceBarLength = 1;
                 
                 // Audio buffers for real samples
                 this.drumBuffers = {
@@ -1165,6 +1171,7 @@
                         bpm: this.bpm,
                         volume: document.getElementById('volumeSlider').value,
                         silenceProbability: this.silenceProbability,
+                        silenceBarLength: this.silenceBarLength,
                         defaultMinutes: document.getElementById('minutesInput').value,
                         defaultSeconds: document.getElementById('secondsInput').value,
                         drumPattern: this.drumPattern,
@@ -1207,6 +1214,12 @@
                         document.getElementById('silenceDisplay').textContent = `${this.silenceProbability}%`;
                     }
 
+                    if (settings.silenceBarLength !== undefined) {
+                        this.silenceBarLength = settings.silenceBarLength;
+                        document.getElementById('pauseLengthSlider').value = this.silenceBarLength;
+                        document.getElementById('pauseLengthDisplay').textContent = `${this.silenceBarLength} bar${this.silenceBarLength > 1 ? 's' : ''}`;
+                    }
+
                     if (settings.defaultMinutes) {
                         document.getElementById('minutesInput').value = settings.defaultMinutes;
                     }
@@ -1239,11 +1252,14 @@
                     
                     this.bpm = 80;
                     this.silenceProbability = 10;
+                    this.silenceBarLength = 1;
                     document.getElementById('bpmSlider').value = 80;
                     document.getElementById('bpmDisplay').textContent = '80 BPM';
                     document.getElementById('volumeSlider').value = 70;
                     document.getElementById('silenceSlider').value = 10;
                     document.getElementById('silenceDisplay').textContent = '10%';
+                    document.getElementById('pauseLengthSlider').value = 1;
+                    document.getElementById('pauseLengthDisplay').textContent = '1 bar';
                     document.getElementById('minutesInput').value = 5;
                     document.getElementById('secondsInput').value = 0;
                     
@@ -1286,6 +1302,7 @@
                         bpm: this.bpm,
                         volume: document.getElementById('volumeSlider').value,
                         silenceProbability: this.silenceProbability,
+                        silenceBarLength: this.silenceBarLength,
                         defaultMinutes: document.getElementById('minutesInput').value,
                         defaultSeconds: document.getElementById('secondsInput').value,
                         drumPattern: this.drumPattern,
@@ -1618,10 +1635,19 @@
             setupSilenceControl() {
                 const silenceSlider = document.getElementById('silenceSlider');
                 const silenceDisplay = document.getElementById('silenceDisplay');
-                
+                const pauseLengthSlider = document.getElementById('pauseLengthSlider');
+                const pauseLengthDisplay = document.getElementById('pauseLengthDisplay');
+
                 silenceSlider.addEventListener('input', (e) => {
                     this.silenceProbability = parseInt(e.target.value);
                     silenceDisplay.textContent = `${this.silenceProbability}%`;
+                    this.autoGeneratePreview();
+                    this.saveAllSettings();
+                });
+
+                pauseLengthSlider.addEventListener('input', (e) => {
+                    this.silenceBarLength = parseInt(e.target.value);
+                    pauseLengthDisplay.textContent = `${this.silenceBarLength} bar${this.silenceBarLength > 1 ? 's' : ''}`;
                     this.autoGeneratePreview();
                     this.saveAllSettings();
                 });
@@ -1689,21 +1715,28 @@
                     const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
                     const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
                     const tempTotalTime = minutes * 60 + seconds;
-                    
+
                     if (tempTotalTime === 0) {
                         this.updateStatus('Please set a timer duration first');
                         return;
                     }
-                    
+
                     this.totalTime = tempTotalTime;
                 }
 
                 this.totalBars = this.calculateTotalBars();
                 this.silentBars = [];
 
-                for (let i = 1; i < this.totalBars; i++) {
+                // Generate silent bar groups
+                for (let i = 1; i < this.totalBars; ) {
                     if (Math.random() * 100 < this.silenceProbability) {
-                        this.silentBars.push(i);
+                        // Add consecutive silent bars based on silenceBarLength
+                        for (let j = 0; j < this.silenceBarLength && (i + j) < this.totalBars; j++) {
+                            this.silentBars.push(i + j);
+                        }
+                        i += this.silenceBarLength; // Skip ahead by the pause length
+                    } else {
+                        i++; // Move to next bar
                     }
                 }
 
