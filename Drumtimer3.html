@@ -762,6 +762,30 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Scrollbar styling for mobile */
+        .drum-pattern::-webkit-scrollbar,
+        .pattern-beats::-webkit-scrollbar,
+        .bars-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .drum-pattern::-webkit-scrollbar-track,
+        .pattern-beats::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 2px;
+        }
+
+        .drum-pattern::-webkit-scrollbar-thumb,
+        .pattern-beats::-webkit-scrollbar-thumb {
+            background: rgba(255, 149, 0, 0.4);
+            border-radius: 2px;
+        }
+
+        .drum-pattern::-webkit-scrollbar-thumb:hover,
+        .pattern-beats::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 149, 0, 0.6);
+        }
+
         /* Responsive Design */
 
         /* Tablets and smaller desktops (768px - 1024px) */
@@ -790,40 +814,51 @@
 
         /* Mobile landscape and tablets portrait (481px - 768px) */
         @media (max-width: 768px) {
+            body {
+                padding: 0.5rem 0;
+            }
+
             .container {
                 padding: 1rem;
-                width: 98%;
-                border-radius: 16px;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+                min-height: 100vh;
             }
 
             .main-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 1.5rem;
+            }
+
+            .timer-section,
+            .drum-machine-section {
+                gap: 1.2rem;
             }
 
             h1 {
-                font-size: 1.3rem;
-                margin-bottom: 0.8rem;
+                font-size: 1.4rem;
+                margin-bottom: 1rem;
             }
 
             .timer-display {
-                font-size: 2rem;
-                margin: 0.3rem 0;
+                font-size: 2.2rem;
+                margin: 0.5rem 0;
             }
 
             .time-input {
-                width: 50px;
-                font-size: 1rem;
-                padding: 0.4rem;
+                width: 55px;
+                font-size: 1.1rem;
+                padding: 0.5rem;
             }
 
             .time-label {
-                font-size: 0.75rem;
+                font-size: 0.8rem;
             }
 
             button {
-                padding: 0.7rem 1.2rem;
-                font-size: 0.9rem;
+                padding: 0.75rem 1.3rem;
+                font-size: 0.95rem;
             }
 
             .buttons {
@@ -831,47 +866,50 @@
             }
 
             .bpm-display {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
 
             .beat-indicator {
-                height: 35px;
-                font-size: 0.7rem;
+                height: 38px;
+                font-size: 0.75rem;
             }
 
             .drum-pattern {
                 gap: 3px;
+                overflow-x: auto;
+                padding: 4px 0;
             }
 
             .bar-indicator {
-                width: 28px;
-                height: 28px;
+                width: 30px;
+                height: 30px;
                 font-size: 0.75rem;
             }
 
             .bars-container {
-                max-height: 150px;
+                max-height: 160px;
             }
 
             .pattern-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.3rem;
+                margin-bottom: 1rem;
             }
 
             .pattern-label {
-                width: 100%;
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
             }
 
             .pattern-beats {
-                max-width: 100%;
+                width: 100%;
+                overflow-x: auto;
+                padding: 4px 0;
             }
 
             .beat-toggle {
-                height: 28px;
-                min-width: 22px;
-                max-width: 35px;
-                font-size: 0.65rem;
+                height: 32px;
+                min-width: 24px;
+                max-width: 40px;
+                font-size: 0.7rem;
             }
 
             .upload-row {
@@ -945,33 +983,55 @@
 
         /* Mobile portrait (320px - 480px) */
         @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
             .container {
-                padding: 0.8rem;
-                border-radius: 12px;
+                padding: 1rem 0.75rem;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .main-grid {
+                gap: 1.2rem;
+            }
+
+            .timer-section,
+            .drum-machine-section {
+                gap: 1rem;
             }
 
             h1 {
-                font-size: 1.1rem;
-                margin-bottom: 0.5rem;
+                font-size: 1.2rem;
+                margin-bottom: 0.75rem;
             }
 
             .timer-display {
-                font-size: 1.8rem;
+                font-size: 2rem;
+                margin: 0.4rem 0;
             }
 
             .time-input {
-                width: 45px;
-                font-size: 0.95rem;
+                width: 50px;
+                font-size: 1rem;
+                padding: 0.45rem;
+            }
+
+            .time-label {
+                font-size: 0.75rem;
             }
 
             button {
-                padding: 0.6rem 1rem;
-                font-size: 0.85rem;
+                padding: 0.7rem 1.1rem;
+                font-size: 0.9rem;
                 letter-spacing: 0.5px;
             }
 
             .buttons {
-                gap: 0.6rem;
+                gap: 0.7rem;
                 width: 100%;
             }
 
@@ -980,34 +1040,51 @@
             }
 
             .bpm-display {
-                font-size: 1.1rem;
+                font-size: 1.15rem;
             }
 
             .beat-indicator {
-                height: 30px;
-                font-size: 0.65rem;
+                height: 36px;
+                font-size: 0.7rem;
             }
 
             .drum-pattern {
                 gap: 2px;
+                overflow-x: auto;
+                padding: 4px 0;
             }
 
             .bar-indicator {
-                width: 24px;
-                height: 24px;
+                width: 26px;
+                height: 26px;
                 font-size: 0.7rem;
+                flex-shrink: 0;
             }
 
             .bars-container {
-                max-height: 120px;
+                max-height: 140px;
                 gap: 3px;
             }
 
+            .pattern-row {
+                margin-bottom: 0.8rem;
+            }
+
+            .pattern-label {
+                font-size: 0.95rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .pattern-beats {
+                overflow-x: auto;
+                padding: 4px 0;
+            }
+
             .beat-toggle {
-                height: 26px;
-                min-width: 20px;
-                max-width: 32px;
-                font-size: 0.6rem;
+                height: 30px;
+                min-width: 22px;
+                max-width: 36px;
+                font-size: 0.65rem;
             }
 
             .pattern-presets,
@@ -1071,54 +1148,81 @@
         /* Very small screens (below 360px) */
         @media (max-width: 360px) {
             .container {
-                padding: 0.6rem;
+                padding: 0.75rem 0.5rem;
+            }
+
+            .main-grid {
+                gap: 1rem;
+            }
+
+            .timer-section,
+            .drum-machine-section {
+                gap: 0.85rem;
             }
 
             h1 {
-                font-size: 1rem;
+                font-size: 1.05rem;
             }
 
             .timer-display {
-                font-size: 1.5rem;
+                font-size: 1.75rem;
             }
 
             .time-input {
-                width: 40px;
-                font-size: 0.9rem;
+                width: 45px;
+                font-size: 0.95rem;
+                padding: 0.4rem;
             }
 
             button {
-                padding: 0.5rem 0.8rem;
-                font-size: 0.8rem;
+                padding: 0.65rem 0.9rem;
+                font-size: 0.85rem;
             }
 
             .beat-indicator {
-                height: 28px;
-                font-size: 0.6rem;
+                height: 34px;
+                font-size: 0.65rem;
             }
 
             .bar-indicator {
-                width: 22px;
-                height: 22px;
+                width: 24px;
+                height: 24px;
                 font-size: 0.65rem;
             }
 
             .beat-toggle {
-                height: 24px;
-                min-width: 18px;
-                max-width: 30px;
+                height: 28px;
+                min-width: 20px;
+                max-width: 34px;
+                font-size: 0.6rem;
             }
 
             .bpm-display {
-                font-size: 1rem;
+                font-size: 1.05rem;
+            }
+
+            .pattern-label {
+                font-size: 0.9rem;
             }
 
             .preset-btn,
             .upload-btn,
             .settings-btn,
             .drum-test-btn {
-                padding: 0.4rem 0.5rem;
-                font-size: 0.65rem;
+                padding: 0.5rem 0.65rem;
+                font-size: 0.7rem;
+            }
+
+            h3, h4 {
+                font-size: 0.85rem;
+            }
+
+            .silence-control,
+            .bar-timeline,
+            .pattern-editor,
+            .sample-upload,
+            .settings-panel {
+                padding: 0.5rem;
             }
         }
     </style>
