@@ -12,38 +12,62 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #4a6741 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 50%, #d1d1d6 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #1d1d1f;
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 2rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.15);
             max-width: 1000px;
             width: 95%;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .drum-machine-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
         .timer-display {
             text-align: center;
-            font-size: 4rem;
+            font-size: 3rem;
             font-weight: bold;
-            margin: 2rem 0;
+            margin: 0.5rem 0;
             font-family: 'Courier New', monospace;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
@@ -62,8 +86,8 @@
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.8rem;
+            margin-bottom: 0;
         }
 
         .time-inputs {
@@ -76,12 +100,21 @@
         .time-input {
             width: 60px;
             padding: 0.5rem;
-            border: none;
-            border-radius: 8px;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            border-radius: 10px;
             text-align: center;
             font-size: 1.2rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
+            font-weight: 600;
+            background: rgba(255, 149, 0, 0.08);
+            color: #1d1d1f;
+            transition: all 0.2s ease;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: rgba(255, 149, 0, 0.6);
+            box-shadow: 0 0 16px rgba(255, 149, 0, 0.3);
+            background: rgba(255, 149, 0, 0.12);
         }
 
         .time-label {
@@ -109,23 +142,27 @@
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
             color: white;
+            box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
         }
 
         .btn-danger {
-            background: linear-gradient(45deg, #f44336, #da190b);
+            background: linear-gradient(135deg, #8e8e93 0%, #636366 100%);
             color: white;
+            box-shadow: 0 4px 16px rgba(142, 142, 147, 0.3);
         }
 
         .btn-warning {
-            background: linear-gradient(45deg, #ff9800, #e68900);
+            background: linear-gradient(135deg, #ffb340 0%, #ff9500 100%);
             color: white;
+            box-shadow: 0 4px 16px rgba(255, 179, 64, 0.3);
         }
 
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(255, 149, 0, 0.4);
+            filter: brightness(1.05);
         }
 
         button:disabled {
@@ -135,30 +172,32 @@
         }
 
         .drum-section {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            margin-top: 0;
+            padding-top: 0;
         }
 
         .bpm-control {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .bpm-display {
             text-align: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #4CAF50;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .bpm-slider {
             width: 100%;
             height: 8px;
             border-radius: 4px;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.08);
             outline: none;
             -webkit-appearance: none;
         }
@@ -168,9 +207,15 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .bpm-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(255, 149, 0, 0.6);
         }
 
         .drum-pattern {
@@ -182,31 +227,38 @@
 
         .beat-indicator {
             height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
-            transition: all 0.1s ease;
+            transition: all 0.2s ease;
+            color: #1d1d1f;
         }
 
         .beat-indicator.active {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
             transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+            box-shadow: 0 0 20px rgba(255, 149, 0, 0.6);
+            border-color: transparent;
+            color: white;
         }
 
         .beat-indicator.kick {
-            background: rgba(255, 87, 87, 0.3);
+            background: rgba(255, 59, 48, 0.15);
+            border-color: rgba(255, 59, 48, 0.3);
         }
 
         .beat-indicator.snare {
-            background: rgba(87, 255, 87, 0.3);
+            background: rgba(52, 199, 89, 0.15);
+            border-color: rgba(52, 199, 89, 0.3);
         }
 
         .beat-indicator.hihat {
-            background: rgba(255, 255, 87, 0.3);
+            background: rgba(255, 149, 0, 0.15);
+            border-color: rgba(255, 149, 0, 0.3);
         }
 
         .drum-controls {
@@ -225,7 +277,7 @@
             flex: 1;
             height: 6px;
             border-radius: 3px;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.08);
             outline: none;
             -webkit-appearance: none;
         }
@@ -235,9 +287,15 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: white;
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(255, 149, 0, 0.6);
         }
 
         .status {
@@ -249,19 +307,21 @@
 
         .progress-bar {
             width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
             margin: 1rem 0;
             overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.08);
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #45a049);
+            background: linear-gradient(90deg, #ff9500, #ff6b00);
             width: 0%;
             transition: width 0.1s ease;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(255, 149, 0, 0.4);
         }
 
         .drum-test-buttons {
@@ -281,10 +341,11 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            margin: 0;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 149, 0, 0.15);
         }
 
         .silence-probability {
@@ -297,7 +358,7 @@
             flex: 1;
             height: 6px;
             border-radius: 3px;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.08);
             outline: none;
             -webkit-appearance: none;
         }
@@ -307,22 +368,32 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #ff6b6b;
+            background: linear-gradient(135deg, #8e8e93, #636366);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(142, 142, 147, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .silence-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(142, 142, 147, 0.6);
         }
 
         .bar-timeline {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            margin: 0;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 149, 0, 0.15);
         }
 
         .bar-timeline h4 {
             text-align: center;
             margin-bottom: 1rem;
-            color: #4CAF50;
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .bars-container {
@@ -330,7 +401,7 @@
             flex-wrap: wrap;
             gap: 4px;
             justify-content: center;
-            max-height: 120px;
+            max-height: 180px;
             overflow-y: auto;
             scroll-behavior: smooth;
             padding: 4px;
@@ -339,19 +410,21 @@
         .bar-indicator {
             width: 30px;
             height: 30px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
             font-weight: bold;
             transition: all 0.3s ease;
-            background: rgba(76, 175, 80, 0.6);
-            color: white;
+            background: rgba(255, 149, 0, 0.2);
+            color: #1d1d1f;
+            border: 1px solid rgba(255, 149, 0, 0.4);
         }
 
         .bar-indicator.silent {
-            background: rgba(255, 107, 107, 0.6);
+            background: rgba(142, 142, 147, 0.3);
+            border-color: rgba(142, 142, 147, 0.4);
         }
 
         .bar-indicator.silent.group-start {
@@ -380,10 +453,11 @@
         }
 
         .pattern-editor {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            margin: 0;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 149, 0, 0.15);
         }
 
         .pattern-row {
@@ -412,8 +486,8 @@
             height: 22px;
             min-width: 18px;
             max-width: 28px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -421,30 +495,35 @@
             font-size: 0.6rem;
             font-weight: bold;
             transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.03);
+            color: #1d1d1f;
         }
 
         .beat-toggle:hover {
-            border-color: rgba(255, 255, 255, 0.6);
+            border-color: rgba(255, 149, 0, 0.4);
             transform: scale(1.1);
+            box-shadow: 0 0 8px rgba(255, 149, 0, 0.2);
         }
 
         .beat-toggle.kick.active {
-            background: rgba(255, 87, 87, 0.8);
-            border-color: #ff5757;
+            background: linear-gradient(135deg, #ff3b30, #d62518);
+            border-color: #ff3b30;
             color: white;
+            box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
         }
 
         .beat-toggle.snare.active {
-            background: rgba(87, 255, 87, 0.8);
-            border-color: #57ff57;
+            background: linear-gradient(135deg, #34c759, #248a3d);
+            border-color: #34c759;
             color: white;
+            box-shadow: 0 0 12px rgba(52, 199, 89, 0.4);
         }
 
         .beat-toggle.hihat.active {
-            background: rgba(255, 255, 87, 0.8);
-            border-color: #ffff57;
-            color: black;
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
+            border-color: #ff9500;
+            color: white;
+            box-shadow: 0 0 12px rgba(255, 149, 0, 0.4);
         }
 
         .pattern-presets {
@@ -459,23 +538,25 @@
             padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            color: #1d1d1f;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .preset-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 149, 0, 0.2);
             transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
         }
 
         .sample-upload {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            margin: 0;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 149, 0, 0.15);
         }
 
         .upload-row {
@@ -500,18 +581,19 @@
         .file-input input[type="file"] {
             width: 100%;
             padding: 0.5rem;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            border: 2px dashed rgba(255, 149, 0, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.02);
+            color: #1d1d1f;
             font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .file-input input[type="file"]:hover {
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 149, 0, 0.6);
+            background: rgba(255, 149, 0, 0.05);
+            box-shadow: 0 0 12px rgba(255, 149, 0, 0.2);
         }
 
         .sample-status {
@@ -525,18 +607,18 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: rgba(255, 107, 107, 0.8);
+            background: rgba(239, 68, 68, 0.8);
             transition: all 0.3s ease;
         }
 
         .status-indicator.loaded {
-            background: rgba(76, 175, 80, 0.8);
-            box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+            background: rgba(34, 197, 94, 0.8);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
         }
 
         .status-indicator.stored {
-            background: rgba(255, 193, 7, 0.8);
-            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+            background: rgba(245, 158, 11, 0.8);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
         }
 
         .status-text {
@@ -556,16 +638,17 @@
             padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            color: #1d1d1f;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .upload-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 149, 0, 0.2);
             transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
         }
 
         .upload-btn:disabled {
@@ -582,10 +665,17 @@
         }
 
         .settings-panel {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            margin: 0;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 149, 0, 0.15);
+        }
+
+        h3, h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
         .settings-row {
@@ -600,21 +690,23 @@
             padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            color: #1d1d1f;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 149, 0, 0.2);
             transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
         }
 
         .settings-btn.success {
-            background: rgba(76, 175, 80, 0.6);
-            border-color: #4CAF50;
+            background: rgba(52, 199, 89, 0.15);
+            border-color: #34c759;
+            color: #248a3d;
         }
 
         .custom-pattern-save {
@@ -627,33 +719,41 @@
 
         .pattern-name-input {
             padding: 0.4rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 149, 0, 0.3);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: rgba(255, 149, 0, 0.08);
+            color: #1d1d1f;
             font-size: 0.8rem;
             min-width: 120px;
+            transition: all 0.2s ease;
+        }
+
+        .pattern-name-input:focus {
+            outline: none;
+            border-color: rgba(255, 149, 0, 0.6);
+            box-shadow: 0 0 12px rgba(255, 149, 0, 0.3);
+            background: rgba(255, 149, 0, 0.12);
         }
 
         .pattern-name-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(29, 29, 31, 0.4);
         }
 
         .storage-info {
             text-align: center;
             font-size: 0.8rem;
             margin-top: 0.5rem;
-            opacity: 0.7;
-            color: #4CAF50;
+            opacity: 0.8;
+            color: #ff9500;
         }
 
         .loading-indicator {
             display: inline-block;
             width: 12px;
             height: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 149, 0, 0.2);
             border-radius: 50%;
-            border-top-color: #4CAF50;
+            border-top-color: #ff9500;
             animation: spin 1s linear infinite;
             margin-left: 0.5rem;
         }
@@ -666,33 +766,61 @@
 <body>
     <div class="container">
         <h1>🥁 Custom Drum Studio</h1>
-        
-        <div class="timer-display" id="timerDisplay">00:00</div>
-        
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        
-        <div class="controls">
-            <div class="time-inputs">
-                <div>
-                    <input type="number" class="time-input" id="minutesInput" min="0" max="59" value="5">
-                    <div class="time-label">MIN</div>
+
+        <div class="main-grid">
+            <!-- LEFT COLUMN: Timer Section -->
+            <div class="timer-section">
+                <div class="timer-display" id="timerDisplay">00:00</div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div style="font-size: 2rem; margin: 0 0.5rem;">:</div>
-                <div>
-                    <input type="number" class="time-input" id="secondsInput" min="0" max="59" value="0">
-                    <div class="time-label">SEC</div>
+
+                <div class="controls">
+                    <div class="time-inputs">
+                        <div>
+                            <input type="number" class="time-input" id="minutesInput" min="0" max="59" value="5">
+                            <div class="time-label">MIN</div>
+                        </div>
+                        <div style="font-size: 2rem; margin: 0 0.5rem;">:</div>
+                        <div>
+                            <input type="number" class="time-input" id="secondsInput" min="0" max="59" value="0">
+                            <div class="time-label">SEC</div>
+                        </div>
+                    </div>
+
+                    <div class="buttons">
+                        <button class="btn-primary" id="toggleBtn" onclick="toggleTimer()">Start</button>
+                        <button class="btn-danger" id="resetBtn" onclick="resetTimer()">Reset</button>
+                    </div>
+                </div>
+
+                <div class="bar-timeline" id="barTimeline">
+                    <h4>📊 Bar Timeline</h4>
+                    <div class="bars-container" id="barsContainer"></div>
+                    <div class="timeline-info" id="timelineInfo">Set timer duration to see pattern</div>
+                </div>
+
+                <div class="silence-control">
+                    <div class="silence-probability">
+                        <span>🔇 Silent Bars:</span>
+                        <input type="range" class="silence-slider" id="silenceSlider" min="0" max="100" value="10">
+                        <span id="silenceDisplay">10%</span>
+                    </div>
+                    <div class="silence-probability" style="margin-top: 0.5rem;">
+                        <span>⏱️ Pause Length:</span>
+                        <input type="range" class="silence-slider" id="pauseLengthSlider" min="1" max="4" value="1">
+                        <span id="pauseLengthDisplay">1 bar</span>
+                    </div>
+                    <div style="font-size: 0.75rem; text-align: center; margin-top: 0.5rem; opacity: 0.8;">
+                        First bar always plays for timing reference
+                    </div>
+                    <button class="btn-primary" onclick="generateSilencePattern()">Regenerate Pattern</button>
                 </div>
             </div>
-            
-            <div class="buttons">
-                <button class="btn-primary" id="toggleBtn" onclick="toggleTimer()">Start</button>
-                <button class="btn-danger" id="resetBtn" onclick="resetTimer()">Reset</button>
-            </div>
-        </div>
-        
-        <div class="drum-section">
+
+            <!-- RIGHT COLUMN: Drum Machine Section -->
+            <div class="drum-machine-section">
             <h3 style="margin-bottom: 1rem; text-align: center;">🥁 Drum Machine</h3>
             
             <div class="bpm-control">
@@ -701,7 +829,7 @@
             </div>
 
             <div class="pattern-editor">
-                <h4 style="text-align: center; margin-bottom: 1rem; color: #4CAF50;">🎵 Pattern Editor</h4>
+                <h4 style="text-align: center; margin-bottom: 1rem; color: #ff9500;">🎵 Pattern Editor</h4>
                 
                 <div class="pattern-row">
                     <div class="pattern-label">Kick:</div>
@@ -733,7 +861,7 @@
             </div>
 
             <div class="sample-upload">
-                <h4 style="text-align: center; margin-bottom: 1rem; color: #4CAF50;">🎵 Upload & Store Samples</h4>
+                <h4 style="text-align: center; margin-bottom: 1rem; color: #ff9500;">🎵 Upload & Store Samples</h4>
                 
                 <div class="upload-row">
                     <div class="upload-label">Kick:</div>
@@ -783,29 +911,6 @@
                 <!-- 16 beat indicators will be generated here -->
             </div>
 
-            <div class="silence-control">
-                <div class="silence-probability">
-                    <span>🔇 Silent Bars Probability:</span>
-                    <input type="range" class="silence-slider" id="silenceSlider" min="0" max="100" value="10">
-                    <span id="silenceDisplay">10%</span>
-                </div>
-                <div class="silence-probability" style="margin-top: 0.8rem;">
-                    <span>⏱️ Pause Length:</span>
-                    <input type="range" class="silence-slider" id="pauseLengthSlider" min="1" max="4" value="1">
-                    <span id="pauseLengthDisplay">1 bar</span>
-                </div>
-                <div style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem; opacity: 0.8;">
-                    ℹ️ First bar always plays for clear timing reference
-                </div>
-                <button class="btn-primary" onclick="generateSilencePattern()">Regenerate Pattern</button>
-            </div>
-
-            <div class="bar-timeline" id="barTimeline">
-                <h4>📊 Bar Timeline</h4>
-                <div class="bars-container" id="barsContainer"></div>
-                <div class="timeline-info" id="timelineInfo">Set timer duration to see pattern</div>
-            </div>
-            
             <div class="drum-controls">
                 <div class="volume-control">
                     <span>🔉</span>
@@ -822,7 +927,7 @@
             </div>
 
             <div class="settings-panel">
-                <h4 style="text-align: center; margin-bottom: 1rem; color: #4CAF50;">💾 Settings & Storage</h4>
+                <h4 style="text-align: center; margin-bottom: 1rem; color: #ff9500;">💾 Settings & Storage</h4>
                 <div class="settings-row">
                     <button class="settings-btn" onclick="saveAllSettings()">Save All Settings</button>
                     <button class="settings-btn" onclick="loadAllSettings()">Load All Settings</button>
@@ -830,8 +935,9 @@
                     <button class="settings-btn" onclick="exportSettings()">Export Settings</button>
                 </div>
             </div>
-        </div>
-        
+        </div> <!-- End drum-machine-section -->
+        </div> <!-- End main-grid -->
+
         <div class="status" id="status">Upload your own drum samples - they'll be compressed and stored permanently!</div>
     </div>
 
@@ -1421,13 +1527,13 @@
                 statusElement.style.fontWeight = 'bold';
                 switch(type) {
                     case 'success':
-                        statusElement.style.color = '#4CAF50';
+                        statusElement.style.color = '#34c759';
                         break;
                     case 'error':
                         statusElement.style.color = '#ff6b6b';
                         break;
                     case 'info':
-                        statusElement.style.color = '#ffffff';
+                        statusElement.style.color = '#636366';
                         break;
                 }
                 
