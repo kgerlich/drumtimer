@@ -772,9 +772,9 @@
 
             <div class="silence-control">
                 <div class="silence-probability">
-                    <span>🔇 Silent Bars:</span>
-                    <input type="range" class="silence-slider" id="silenceSlider" min="0" max="50" value="20">
-                    <span id="silenceDisplay">20%</span>
+                    <span>🔇 Silent Bars Probability:</span>
+                    <input type="range" class="silence-slider" id="silenceSlider" min="0" max="100" value="10">
+                    <span id="silenceDisplay">10%</span>
                 </div>
                 <div style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem; opacity: 0.8;">
                     ℹ️ First bar always plays for clear timing reference
@@ -833,7 +833,7 @@
                 this.absoluteBeat = 0;
                 this.bpm = 80;
                 this.silentBars = [];
-                this.silenceProbability = 20;
+                this.silenceProbability = 10;
                 
                 // Audio buffers for real samples
                 this.drumBuffers = {
@@ -1238,12 +1238,12 @@
                     });
                     
                     this.bpm = 80;
-                    this.silenceProbability = 20;
+                    this.silenceProbability = 10;
                     document.getElementById('bpmSlider').value = 80;
                     document.getElementById('bpmDisplay').textContent = '80 BPM';
                     document.getElementById('volumeSlider').value = 70;
-                    document.getElementById('silenceSlider').value = 20;
-                    document.getElementById('silenceDisplay').textContent = '20%';
+                    document.getElementById('silenceSlider').value = 10;
+                    document.getElementById('silenceDisplay').textContent = '10%';
                     document.getElementById('minutesInput').value = 5;
                     document.getElementById('secondsInput').value = 0;
                     
