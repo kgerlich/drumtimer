@@ -28,8 +28,8 @@
             padding: 2rem;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            max-width: 500px;
-            width: 90%;
+            max-width: 1000px;
+            width: 95%;
         }
 
         h1 {
@@ -687,8 +687,7 @@
             </div>
             
             <div class="buttons">
-                <button class="btn-primary" id="startBtn" onclick="startTimer()">Start</button>
-                <button class="btn-warning" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
+                <button class="btn-primary" id="toggleBtn" onclick="toggleTimer()">Start</button>
                 <button class="btn-danger" id="resetBtn" onclick="resetTimer()">Reset</button>
             </div>
         </div>
@@ -2074,23 +2073,17 @@
             }
 
             updateButtons() {
-                const startBtn = document.getElementById('startBtn');
-                const pauseBtn = document.getElementById('pauseBtn');
-                
+                const toggleBtn = document.getElementById('toggleBtn');
+
                 if (this.isRunning && !this.isPaused) {
-                    startBtn.disabled = true;
-                    pauseBtn.disabled = false;
-                    pauseBtn.textContent = 'Pause';
+                    toggleBtn.textContent = 'Pause';
+                    toggleBtn.className = 'btn-warning';
                 } else if (this.isPaused) {
-                    startBtn.disabled = false;
-                    pauseBtn.disabled = false;
-                    pauseBtn.textContent = 'Resume';
-                    startBtn.textContent = 'Resume';
+                    toggleBtn.textContent = 'Resume';
+                    toggleBtn.className = 'btn-primary';
                 } else {
-                    startBtn.disabled = false;
-                    pauseBtn.disabled = true;
-                    startBtn.textContent = 'Start';
-                    pauseBtn.textContent = 'Pause';
+                    toggleBtn.textContent = 'Start';
+                    toggleBtn.className = 'btn-primary';
                 }
             }
 
@@ -2199,6 +2192,14 @@
         const drumTimer = new DrumTimerApp();
 
         // Timer functions
+        function toggleTimer() {
+            if (drumTimer.isRunning && !drumTimer.isPaused) {
+                drumTimer.pause();
+            } else {
+                drumTimer.start();
+            }
+        }
+
         function startTimer() {
             drumTimer.start();
         }
@@ -2289,11 +2290,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                if (drumTimer.isRunning) {
-                    pauseTimer();
-                } else {
-                    startTimer();
-                }
+                toggleTimer();
             } else if (e.code === 'Escape') {
                 resetTimer();
             }
