@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drum Timer App with Compressed Sample Storage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6741 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .timer-display {
+            text-align: center;
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .timer-display.warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .time-input {
+            width: 60px;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ff9800, #e68900);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .drum-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .bpm-control {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .bpm-display {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .bpm-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .bpm-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .drum-pattern {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .beat-indicator {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.1s ease;
+        }
+
+        .beat-indicator.active {
+            background: #4CAF50;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+
+        .beat-indicator.kick {
+            background: rgba(255, 87, 87, 0.3);
+        }
+
+        .beat-indicator.snare {
+            background: rgba(87, 255, 87, 0.3);
+        }
+
+        .beat-indicator.hihat {
+            background: rgba(255, 255, 87, 0.3);
+        }
+
+        .drum-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 4px;
+        }
+
+        .drum-test-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .drum-test-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 15px;
+        }
+
+        .silence-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .silence-probability {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .silence-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .silence-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .bar-timeline {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .bar-timeline h4 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+
+        .bars-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            max-height: 120px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            padding: 4px;
+        }
+
+        .bar-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: rgba(76, 175, 80, 0.6);
+            color: white;
+        }
+
+        .bar-indicator.silent {
+            background: rgba(255, 107, 107, 0.6);
+        }
+
+        .bar-indicator.current {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            border: 3px solid white;
+            z-index: 10;
+        }
+
+        .bar-indicator.past {
+            opacity: 0.5;
+        }
+
+        .pattern-editor {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .pattern-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .pattern-label {
+            width: 60px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .pattern-beats {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 2px;
+            flex: 1;
+            max-width: calc(100% - 80px);
+        }
+
+        .beat-toggle {
+            width: 100%;
+            height: 22px;
+            min-width: 18px;
+            max-width: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .beat-toggle:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.1);
+        }
+
+        .beat-toggle.kick.active {
+            background: rgba(255, 87, 87, 0.8);
+            border-color: #ff5757;
+            color: white;
+        }
+
+        .beat-toggle.snare.active {
+            background: rgba(87, 255, 87, 0.8);
+            border-color: #57ff57;
+            color: white;
+        }
+
+        .beat-toggle.hihat.active {
+            background: rgba(255, 255, 87, 0.8);
+            border-color: #ffff57;
+            color: black;
+        }
+
+        .pattern-presets {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .sample-upload {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .upload-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-label {
+            width: 60px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .file-input input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-input input[type="file"]:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .sample-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 107, 107, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.loaded {
+            background: rgba(76, 175, 80, 0.8);
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+        }
+
+        .status-indicator.stored {
+            background: rgba(255, 193, 7, 0.8);
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .upload-controls {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .timeline-info {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .settings-panel {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .settings-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .settings-btn.success {
+            background: rgba(76, 175, 80, 0.6);
+            border-color: #4CAF50;
+        }
+
+        .custom-pattern-save {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .pattern-name-input {
+            padding: 0.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.8rem;
+            min-width: 120px;
+        }
+
+        .pattern-name-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .storage-info {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            opacity: 0.7;
+            color: #4CAF50;
+        }
+
+        .loading-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥁 Custom Drum Studio</h1>
+        
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="controls">
+            <div class="time-inputs">
+                <div>
+                    <input type="number" class="time-input" id="minutesInput" min="0" max="59" value="5">
+                    <div class="time-label">MIN</div>
+                </div>
+                <div style="font-size: 2rem; margin: 0 0.5rem;">:</div>
+                <div>
+                    <input type="number" class="time-input" id="secondsInput" min="0" max="59" value="0">
+                    <div class="time-label">SEC</div>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn-primary" id="startBtn" onclick="startTimer()">Start</button>
+                <button class="btn-warning" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
+                <button class="btn-danger" id="resetBtn" onclick="resetTimer()">Reset</button>
+            </div>
+        </div>
+        
+        <div class="drum-section">
+            <h3 style="margin-bottom: 1rem; text-align: center;">🥁 Drum Machine</h3>
+            
+            <div class="bpm-control">
+                <div class="bpm-display" id="bpmDisplay">80 BPM</div>
+                <input type="range" class="bpm-slider" id="bpmSlider" min="60" max="200" value="80">
+            </div>
+
+            <div class="pattern-editor">
+                <h4 style="text-align: center; margin-bottom: 1rem; color: #4CAF50;">🎵 Pattern Editor</h4>
+                
+                <div class="pattern-row">
+                    <div class="pattern-label">Kick:</div>
+                    <div class="pattern-beats" id="kickPattern"></div>
+                </div>
+                
+                <div class="pattern-row">
+                    <div class="pattern-label">Snare:</div>
+                    <div class="pattern-beats" id="snarePattern"></div>
+                </div>
+                
+                <div class="pattern-row">
+                    <div class="pattern-label">Hi-Hat:</div>
+                    <div class="pattern-beats" id="hihatPattern"></div>
+                </div>
+
+                <div class="custom-pattern-save">
+                    <input type="text" class="pattern-name-input" id="customPatternName" placeholder="Custom pattern name">
+                    <button class="settings-btn" onclick="saveCustomPattern()">Save Pattern</button>
+                </div>
+
+                <div class="pattern-presets" id="patternPresets">
+                    <button class="preset-btn" onclick="loadPreset('basic')">Basic Rock</button>
+                    <button class="preset-btn" onclick="loadPreset('disco')">Disco</button>
+                    <button class="preset-btn" onclick="loadPreset('funk')">Funk</button>
+                    <button class="preset-btn" onclick="loadPreset('reggae')">Reggae</button>
+                    <button class="preset-btn" onclick="loadPreset('clear')">Clear All</button>
+                </div>
+            </div>
+
+            <div class="sample-upload">
+                <h4 style="text-align: center; margin-bottom: 1rem; color: #4CAF50;">🎵 Upload & Store Samples</h4>
+                
+                <div class="upload-row">
+                    <div class="upload-label">Kick:</div>
+                    <div class="file-input">
+                        <input type="file" id="kickFile" accept=".wav,.mp3,.ogg" onchange="handleSampleUpload('kick', this)">
+                    </div>
+                    <div class="sample-status">
+                        <div class="status-indicator" id="kickStatus"></div>
+                        <span class="status-text" id="kickStatusText">No sample</span>
+                    </div>
+                </div>
+                
+                <div class="upload-row">
+                    <div class="upload-label">Snare:</div>
+                    <div class="file-input">
+                        <input type="file" id="snareFile" accept=".wav,.mp3,.ogg" onchange="handleSampleUpload('snare', this)">
+                    </div>
+                    <div class="sample-status">
+                        <div class="status-indicator" id="snareStatus"></div>
+                        <span class="status-text" id="snareStatusText">No sample</span>
+                    </div>
+                </div>
+                
+                <div class="upload-row">
+                    <div class="upload-label">Hi-Hat:</div>
+                    <div class="file-input">
+                        <input type="file" id="hihatFile" accept=".wav,.mp3,.ogg" onchange="handleSampleUpload('hihat', this)">
+                    </div>
+                    <div class="sample-status">
+                        <div class="status-indicator" id="hihatStatus"></div>
+                        <span class="status-text" id="hihatStatusText">No sample</span>
+                    </div>
+                </div>
+
+                <div class="upload-controls">
+                    <button class="upload-btn" onclick="clearAllSamples()">Clear All Samples</button>
+                    <button class="upload-btn" onclick="testAllSamples()">Test All Samples</button>
+                    <button class="upload-btn" onclick="showStorageInfo()">Storage Info</button>
+                </div>
+                
+                <div class="storage-info" id="storageInfo">
+                    Stored samples are automatically compressed and saved permanently
+                </div>
+            </div>
+            
+            <div class="drum-pattern" id="drumPattern">
+                <!-- 16 beat indicators will be generated here -->
+            </div>
+
+            <div class="silence-control">
+                <div class="silence-probability">
+                    <span>🔇 Silent Bars:</span>
+                    <input type="range" class="silence-slider" id="silenceSlider" min="0" max="50" value="20">
+                    <span id="silenceDisplay">20%</span>
+                </div>
+                <div style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem; opacity: 0.8;">
+                    ℹ️ First bar always plays for clear timing reference
+                </div>
+                <button class="btn-primary" onclick="generateSilencePattern()">Regenerate Pattern</button>
+            </div>
+
+            <div class="bar-timeline" id="barTimeline">
+                <h4>📊 Bar Timeline</h4>
+                <div class="bars-container" id="barsContainer"></div>
+                <div class="timeline-info" id="timelineInfo">Set timer duration to see pattern</div>
+            </div>
+            
+            <div class="drum-controls">
+                <div class="volume-control">
+                    <span>🔉</span>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                    <span>🔊</span>
+                </div>
+                
+                <div class="drum-test-buttons">
+                    <button class="btn-primary drum-test-btn" onclick="testDrum('kick')">Kick</button>
+                    <button class="btn-primary drum-test-btn" onclick="testDrum('snare')">Snare</button>
+                    <button class="btn-primary drum-test-btn" onclick="testDrum('hihat')">Hi-Hat</button>
+                    <button class="btn-primary drum-test-btn" onclick="testGong()">Gong</button>
+                </div>
+            </div>
+
+            <div class="settings-panel">
+                <h4 style="text-align: center; margin-bottom: 1rem; color: #4CAF50;">💾 Settings & Storage</h4>
+                <div class="settings-row">
+                    <button class="settings-btn" onclick="saveAllSettings()">Save All Settings</button>
+                    <button class="settings-btn" onclick="loadAllSettings()">Load All Settings</button>
+                    <button class="settings-btn" onclick="resetAllSettings()">Reset to Defaults</button>
+                    <button class="settings-btn" onclick="exportSettings()">Export Settings</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status" id="status">Upload your own drum samples - they'll be compressed and stored permanently!</div>
+    </div>
+
+    <script>
+        class DrumTimerApp {
+            constructor() {
+                this.timeRemaining = 0;
+                this.totalTime = 0;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.interval = null;
+                this.audioContext = null;
+                this.drumInterval = null;
+                this.currentBeat = 0;
+                this.currentBar = 0;
+                this.totalBars = 0;
+                this.absoluteBeat = 0;
+                this.bpm = 80;
+                this.silentBars = [];
+                this.silenceProbability = 20;
+                
+                // Audio buffers for real samples
+                this.drumBuffers = {
+                    kick: null,
+                    snare: null,
+                    hihat: null
+                };
+
+                // Compressed sample data storage
+                this.storedSamples = {
+                    kick: null,
+                    snare: null,
+                    hihat: null
+                };
+
+                // Sample metadata
+                this.sampleInfo = {
+                    kick: { name: '', size: 0, compressedSize: 0, loaded: false, stored: false },
+                    snare: { name: '', size: 0, compressedSize: 0, loaded: false, stored: false },
+                    hihat: { name: '', size: 0, compressedSize: 0, loaded: false, stored: false }
+                };
+                
+                // 4/4 drum pattern (16th notes) - Default basic rock
+                this.drumPattern = {
+                    kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                    snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                    hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                };
+
+                // Pattern presets (will be extended with custom patterns)
+                this.presets = {
+                    basic: {
+                        kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                    },
+                    disco: {
+                        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+                    },
+                    funk: {
+                        kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0]
+                    },
+                    reggae: {
+                        kick: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+                    },
+                    clear: {
+                        kick: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        hihat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    }
+                };
+                
+                this.initializeAudio();
+                this.loadAllSettings(); // Load saved settings first
+                this.createPatternEditor();
+                this.createBeatIndicators();
+                this.updateDisplay();
+                this.setupBPMControl();
+                this.setupSilenceControl();
+                this.setupVolumeControl();
+                this.setupInputListeners();
+                this.loadCustomPatterns(); // Load and display custom patterns
+                this.loadStoredSamples(); // Load stored audio samples
+                this.autoGeneratePreview();
+            }
+
+            // ========= AUDIO COMPRESSION & STORAGE METHODS =========
+
+            async compressAudioData(arrayBuffer, originalFilename) {
+                try {
+                    if (!this.audioContext) return null;
+                    
+                    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer.slice());
+                    
+                    // Parameters for compression
+                    const targetSampleRate = Math.min(audioBuffer.sampleRate, 22050); // Max 22kHz
+                    const targetChannels = 1; // Force mono
+                    const compressionRatio = targetSampleRate / audioBuffer.sampleRate;
+                    
+                    const compressedLength = Math.floor(audioBuffer.length * compressionRatio);
+                    const compressedBuffer = this.audioContext.createBuffer(
+                        targetChannels, 
+                        compressedLength, 
+                        targetSampleRate
+                    );
+                    
+                    // Downsample and convert to mono
+                    const sourceData = audioBuffer.getChannelData(0);
+                    const compressedData = compressedBuffer.getChannelData(0);
+                    
+                    for (let i = 0; i < compressedLength; i++) {
+                        const sourceIndex = Math.floor(i / compressionRatio);
+                        compressedData[i] = sourceData[sourceIndex] || 0;
+                    }
+                    
+                    // Convert to 16-bit PCM and then to base64
+                    const pcmData = this.audioBufferToPCM16(compressedBuffer);
+                    const base64Data = this.arrayBufferToBase64(pcmData);
+                    
+                    const compressionInfo = {
+                        data: base64Data,
+                        sampleRate: targetSampleRate,
+                        length: compressedLength,
+                        channels: targetChannels,
+                        originalSize: arrayBuffer.byteLength,
+                        compressedSize: base64Data.length,
+                        filename: originalFilename,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    return compressionInfo;
+                } catch (error) {
+                    console.error('Audio compression failed:', error);
+                    return null;
+                }
+            }
+
+            audioBufferToPCM16(audioBuffer) {
+                // Convert float32 audio data to 16-bit PCM
+                const length = audioBuffer.length;
+                const arrayBuffer = new ArrayBuffer(length * 2); // 16-bit = 2 bytes per sample
+                const view = new DataView(arrayBuffer);
+                const floatData = audioBuffer.getChannelData(0);
+                
+                for (let i = 0; i < length; i++) {
+                    const sample = Math.max(-1, Math.min(1, floatData[i])); // Clamp to [-1, 1]
+                    const pcm16 = Math.round(sample * 32767); // Convert to 16-bit
+                    view.setInt16(i * 2, pcm16, true); // little-endian
+                }
+                
+                return arrayBuffer;
+            }
+
+            arrayBufferToBase64(buffer) {
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary);
+            }
+
+            base64ToArrayBuffer(base64) {
+                const binary = atob(base64);
+                const buffer = new ArrayBuffer(binary.length);
+                const view = new Uint8Array(buffer);
+                for (let i = 0; i < binary.length; i++) {
+                    view[i] = binary.charCodeAt(i);
+                }
+                return buffer;
+            }
+
+            async decompressAudioData(compressionInfo) {
+                try {
+                    if (!this.audioContext || !compressionInfo) return null;
+                    
+                    const pcmData = this.base64ToArrayBuffer(compressionInfo.data);
+                    const floatArray = this.pcm16ToFloat32(pcmData);
+                    
+                    const audioBuffer = this.audioContext.createBuffer(
+                        compressionInfo.channels,
+                        compressionInfo.length,
+                        compressionInfo.sampleRate
+                    );
+                    
+                    audioBuffer.getChannelData(0).set(floatArray);
+                    
+                    return audioBuffer;
+                } catch (error) {
+                    console.error('Audio decompression failed:', error);
+                    return null;
+                }
+            }
+
+            pcm16ToFloat32(arrayBuffer) {
+                const view = new DataView(arrayBuffer);
+                const length = arrayBuffer.byteLength / 2; // 2 bytes per 16-bit sample
+                const floatArray = new Float32Array(length);
+                
+                for (let i = 0; i < length; i++) {
+                    const pcm16 = view.getInt16(i * 2, true); // little-endian
+                    floatArray[i] = pcm16 / 32767; // Convert back to [-1, 1]
+                }
+                
+                return floatArray;
+            }
+
+            async storeSampleData(drumType, file) {
+                try {
+                    this.showLoadingIndicator(drumType, true);
+                    
+                    const arrayBuffer = await file.arrayBuffer();
+                    const compressionInfo = await this.compressAudioData(arrayBuffer, file.name);
+                    
+                    if (compressionInfo) {
+                        this.storedSamples[drumType] = compressionInfo;
+                        this.sampleInfo[drumType] = {
+                            name: file.name,
+                            size: file.size,
+                            compressedSize: compressionInfo.compressedSize,
+                            loaded: true,
+                            stored: true
+                        };
+                        
+                        const audioBuffer = await this.decompressAudioData(compressionInfo);
+                        this.drumBuffers[drumType] = audioBuffer;
+                        
+                        this.saveSampleToStorage(drumType, compressionInfo);
+                        
+                        const compressionRatio = ((file.size - compressionInfo.compressedSize) / file.size * 100).toFixed(1);
+                        this.updateSampleStatus(
+                            drumType, 
+                            true, 
+                            `${file.name} (${compressionRatio}% compressed)`
+                        );
+                        
+                        this.showLoadingIndicator(drumType, false);
+                        return true;
+                    } else {
+                        this.showLoadingIndicator(drumType, false);
+                        return false;
+                    }
+                } catch (error) {
+                    console.error(`Failed to store ${drumType} sample:`, error);
+                    this.showLoadingIndicator(drumType, false);
+                    return false;
+                }
+            }
+
+            saveSampleToStorage(drumType, compressionInfo) {
+                try {
+                    const storageKey = `drumSample_${drumType}`;
+                    localStorage.setItem(storageKey, JSON.stringify(compressionInfo));
+                } catch (error) {
+                    console.error(`Failed to save ${drumType} to localStorage:`, error);
+                    if (error.name === 'QuotaExceededError') {
+                        this.showTemporaryStatus(`Storage full! Cannot save ${drumType} sample`, 'error');
+                    }
+                }
+            }
+
+            async loadStoredSamples() {
+                const drumTypes = ['kick', 'snare', 'hihat'];
+                
+                for (const drumType of drumTypes) {
+                    try {
+                        const storageKey = `drumSample_${drumType}`;
+                        const stored = localStorage.getItem(storageKey);
+                        
+                        if (stored) {
+                            const compressionInfo = JSON.parse(stored);
+                            this.storedSamples[drumType] = compressionInfo;
+                            
+                            const audioBuffer = await this.decompressAudioData(compressionInfo);
+                            if (audioBuffer) {
+                                this.drumBuffers[drumType] = audioBuffer;
+                                this.sampleInfo[drumType] = {
+                                    name: compressionInfo.filename,
+                                    size: compressionInfo.originalSize,
+                                    compressedSize: compressionInfo.compressedSize,
+                                    loaded: true,
+                                    stored: true
+                                };
+                                
+                                this.updateSampleStatus(
+                                    drumType, 
+                                    true, 
+                                    `${compressionInfo.filename} (stored)`
+                                );
+                                
+                                const statusIndicator = document.getElementById(`${drumType}Status`);
+                                statusIndicator.classList.add('stored');
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Failed to load stored ${drumType} sample:`, error);
+                    }
+                }
+            }
+
+            showLoadingIndicator(drumType, show) {
+                const statusText = document.getElementById(`${drumType}StatusText`);
+                if (show) {
+                    statusText.innerHTML = `Loading... <div class="loading-indicator"></div>`;
+                }
+            }
+
+            showStorageInfo() {
+                const totalOriginalSize = Object.values(this.sampleInfo)
+                    .reduce((sum, info) => sum + (info.size || 0), 0);
+                const totalCompressedSize = Object.values(this.sampleInfo)
+                    .reduce((sum, info) => sum + (info.compressedSize || 0), 0);
+                
+                const storedCount = Object.values(this.sampleInfo)
+                    .filter(info => info.stored).length;
+                
+                if (storedCount === 0) {
+                    this.showTemporaryStatus('No samples stored yet', 'info');
+                    return;
+                }
+                
+                const compressionRatio = totalOriginalSize > 0 
+                    ? ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)
+                    : 0;
+                
+                const message = `${storedCount} samples stored | Original: ${this.formatBytes(totalOriginalSize)} | Compressed: ${this.formatBytes(totalCompressedSize)} | Saved: ${compressionRatio}%`;
+                this.showTemporaryStatus(message, 'success');
+            }
+
+            formatBytes(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            // ========= LOCALSTORAGE METHODS =========
+
+            saveAllSettings() {
+                try {
+                    const settings = {
+                        bpm: this.bpm,
+                        volume: document.getElementById('volumeSlider').value,
+                        silenceProbability: this.silenceProbability,
+                        defaultMinutes: document.getElementById('minutesInput').value,
+                        defaultSeconds: document.getElementById('secondsInput').value,
+                        drumPattern: this.drumPattern,
+                        sampleInfo: this.sampleInfo,
+                        customPresets: this.getCustomPresets(),
+                        timestamp: new Date().toISOString()
+                    };
+
+                    localStorage.setItem('drumTimerSettings', JSON.stringify(settings));
+                    this.showTemporaryStatus('✅ All settings saved!', 'success');
+                } catch (error) {
+                    console.error('Failed to save settings:', error);
+                    this.showTemporaryStatus('❌ Failed to save settings', 'error');
+                }
+            }
+
+            loadAllSettings() {
+                try {
+                    const saved = localStorage.getItem('drumTimerSettings');
+                    if (!saved) {
+                        this.showTemporaryStatus('No saved settings found', 'info');
+                        return;
+                    }
+
+                    const settings = JSON.parse(saved);
+                    
+                    if (settings.bpm) {
+                        this.bpm = settings.bpm;
+                        document.getElementById('bpmSlider').value = this.bpm;
+                        document.getElementById('bpmDisplay').textContent = `${this.bpm} BPM`;
+                    }
+
+                    if (settings.volume) {
+                        document.getElementById('volumeSlider').value = settings.volume;
+                    }
+
+                    if (settings.silenceProbability !== undefined) {
+                        this.silenceProbability = settings.silenceProbability;
+                        document.getElementById('silenceSlider').value = this.silenceProbability;
+                        document.getElementById('silenceDisplay').textContent = `${this.silenceProbability}%`;
+                    }
+
+                    if (settings.defaultMinutes) {
+                        document.getElementById('minutesInput').value = settings.defaultMinutes;
+                    }
+
+                    if (settings.defaultSeconds) {
+                        document.getElementById('secondsInput').value = settings.defaultSeconds;
+                    }
+
+                    if (settings.drumPattern) {
+                        this.drumPattern = settings.drumPattern;
+                    }
+
+                    if (settings.customPresets) {
+                        this.presets = { ...this.presets, ...settings.customPresets };
+                    }
+
+                    this.showTemporaryStatus('✅ Settings loaded!', 'success');
+                } catch (error) {
+                    console.error('Failed to load settings:', error);
+                    this.showTemporaryStatus('❌ Failed to load settings', 'error');
+                }
+            }
+
+            resetAllSettings() {
+                try {
+                    localStorage.removeItem('drumTimerSettings');
+                    ['kick', 'snare', 'hihat'].forEach(drumType => {
+                        localStorage.removeItem(`drumSample_${drumType}`);
+                    });
+                    
+                    this.bpm = 80;
+                    this.silenceProbability = 20;
+                    document.getElementById('bpmSlider').value = 80;
+                    document.getElementById('bpmDisplay').textContent = '80 BPM';
+                    document.getElementById('volumeSlider').value = 70;
+                    document.getElementById('silenceSlider').value = 20;
+                    document.getElementById('silenceDisplay').textContent = '20%';
+                    document.getElementById('minutesInput').value = 5;
+                    document.getElementById('secondsInput').value = 0;
+                    
+                    this.drumPattern = {
+                        kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                    };
+
+                    this.presets = {
+                        basic: this.presets.basic,
+                        disco: this.presets.disco,
+                        funk: this.presets.funk,
+                        reggae: this.presets.reggae,
+                        clear: this.presets.clear
+                    };
+
+                    this.clearAllSamples();
+                    this.storedSamples = { kick: null, snare: null, hihat: null };
+                    this.sampleInfo = {
+                        kick: { name: '', size: 0, compressedSize: 0, loaded: false, stored: false },
+                        snare: { name: '', size: 0, compressedSize: 0, loaded: false, stored: false },
+                        hihat: { name: '', size: 0, compressedSize: 0, loaded: false, stored: false }
+                    };
+                    
+                    this.updatePatternEditor();
+                    this.createBeatIndicators();
+                    this.loadCustomPatterns();
+                    this.autoGeneratePreview();
+                    this.showTemporaryStatus('✅ Reset complete!', 'success');
+                } catch (error) {
+                    console.error('Failed to reset settings:', error);
+                    this.showTemporaryStatus('❌ Failed to reset settings', 'error');
+                }
+            }
+
+            exportSettings() {
+                try {
+                    const settings = {
+                        bpm: this.bpm,
+                        volume: document.getElementById('volumeSlider').value,
+                        silenceProbability: this.silenceProbability,
+                        defaultMinutes: document.getElementById('minutesInput').value,
+                        defaultSeconds: document.getElementById('secondsInput').value,
+                        drumPattern: this.drumPattern,
+                        customPresets: this.getCustomPresets(),
+                        storedSamples: this.storedSamples,
+                        sampleInfo: this.sampleInfo,
+                        exportedAt: new Date().toISOString(),
+                        version: '2.0'
+                    };
+
+                    const dataStr = JSON.stringify(settings, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+                    const exportFileDefaultName = `drum-timer-complete-${new Date().toISOString().split('T')[0]}.json`;
+
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+
+                    this.showTemporaryStatus('✅ Complete export done!', 'success');
+                } catch (error) {
+                    console.error('Failed to export settings:', error);
+                    this.showTemporaryStatus('❌ Failed to export settings', 'error');
+                }
+            }
+
+            getCustomPresets() {
+                const customPresets = {};
+                Object.keys(this.presets).forEach(key => {
+                    if (!['basic', 'disco', 'funk', 'reggae', 'clear'].includes(key)) {
+                        customPresets[key] = this.presets[key];
+                    }
+                });
+                return customPresets;
+            }
+
+            saveCustomPattern() {
+                const nameInput = document.getElementById('customPatternName');
+                const name = nameInput.value.trim();
+                
+                if (!name) {
+                    this.showTemporaryStatus('Please enter a pattern name', 'error');
+                    return;
+                }
+
+                if (['basic', 'disco', 'funk', 'reggae', 'clear'].includes(name)) {
+                    this.showTemporaryStatus('Cannot overwrite built-in preset', 'error');
+                    return;
+                }
+
+                this.presets[name] = {
+                    kick: [...this.drumPattern.kick],
+                    snare: [...this.drumPattern.snare],
+                    hihat: [...this.drumPattern.hihat]
+                };
+
+                this.saveAllSettings();
+                nameInput.value = '';
+                this.loadCustomPatterns();
+                this.showTemporaryStatus(`✅ Pattern '${name}' saved!`, 'success');
+            }
+
+            loadCustomPatterns() {
+                const presetsContainer = document.getElementById('patternPresets');
+                
+                const customButtons = presetsContainer.querySelectorAll('.custom-preset-btn');
+                customButtons.forEach(btn => btn.remove());
+
+                Object.keys(this.presets).forEach(key => {
+                    if (!['basic', 'disco', 'funk', 'reggae', 'clear'].includes(key)) {
+                        const button = document.createElement('button');
+                        button.className = 'preset-btn custom-preset-btn';
+                        button.textContent = key;
+                        button.onclick = () => this.loadPreset(key);
+                        
+                        button.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            this.deleteCustomPreset(key);
+                        };
+                        button.title = `Click to load, right-click to delete`;
+                        
+                        presetsContainer.appendChild(button);
+                    }
+                });
+            }
+
+            deleteCustomPreset(name) {
+                if (confirm(`Delete custom preset '${name}'?`)) {
+                    delete this.presets[name];
+                    this.saveAllSettings();
+                    this.loadCustomPatterns();
+                    this.showTemporaryStatus(`✅ Deleted preset '${name}'`, 'success');
+                }
+            }
+
+            showTemporaryStatus(message, type = 'info') {
+                const statusElement = document.getElementById('status');
+                const originalText = statusElement.textContent;
+                
+                statusElement.textContent = message;
+                
+                statusElement.style.fontWeight = 'bold';
+                switch(type) {
+                    case 'success':
+                        statusElement.style.color = '#4CAF50';
+                        break;
+                    case 'error':
+                        statusElement.style.color = '#ff6b6b';
+                        break;
+                    case 'info':
+                        statusElement.style.color = '#ffffff';
+                        break;
+                }
+                
+                setTimeout(() => {
+                    statusElement.textContent = originalText;
+                    statusElement.style.color = '';
+                    statusElement.style.fontWeight = '';
+                }, 4000);
+            }
+
+            // ========= SAMPLE MANAGEMENT =========
+
+            async loadSampleFromFile(drumType, file) {
+                return await this.storeSampleData(drumType, file);
+            }
+
+            updateSampleStatus(drumType, loaded, filename = '') {
+                const statusIndicator = document.getElementById(`${drumType}Status`);
+                const statusText = document.getElementById(`${drumType}StatusText`);
+                
+                if (loaded) {
+                    statusIndicator.classList.add('loaded');
+                    if (this.sampleInfo[drumType].stored) {
+                        statusIndicator.classList.add('stored');
+                    }
+                    statusText.textContent = filename.length > 20 ? filename.substring(0, 17) + '...' : filename;
+                    statusText.title = filename;
+                } else {
+                    statusIndicator.classList.remove('loaded', 'stored');
+                    statusText.textContent = filename || 'No sample';
+                    statusText.title = '';
+                }
+            }
+
+            clearSample(drumType) {
+                this.drumBuffers[drumType] = null;
+                this.storedSamples[drumType] = null;
+                this.sampleInfo[drumType] = { name: '', size: 0, compressedSize: 0, loaded: false, stored: false };
+                this.updateSampleStatus(drumType, false);
+                
+                const fileInput = document.getElementById(`${drumType}File`);
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+                
+                localStorage.removeItem(`drumSample_${drumType}`);
+                this.saveAllSettings();
+            }
+
+            clearAllSamples() {
+                ['kick', 'snare', 'hihat'].forEach(drumType => {
+                    this.clearSample(drumType);
+                });
+                this.updateStatus('All samples cleared - using synthesized drums');
+            }
+
+            getSampleCount() {
+                return Object.values(this.drumBuffers).filter(buffer => buffer !== null).length;
+            }
+
+            getStoredSampleCount() {
+                return Object.values(this.sampleInfo).filter(info => info.stored).length;
+            }
+
+            testAllSamples() {
+                const delay = 300;
+                ['kick', 'snare', 'hihat'].forEach((drumType, index) => {
+                    setTimeout(() => {
+                        this.playDrumSample(drumType);
+                    }, index * delay);
+                });
+            }
+
+            // ========= AUDIO & PATTERN METHODS =========
+
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (error) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+
+            playDrumSample(drumType) {
+                if (!this.audioContext) return;
+
+                const volume = document.getElementById('volumeSlider').value / 100;
+
+                if (this.drumBuffers[drumType]) {
+                    const source = this.audioContext.createBufferSource();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    source.buffer = this.drumBuffers[drumType];
+                    source.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                    source.start(this.audioContext.currentTime);
+                } else {
+                    switch (drumType) {
+                        case 'kick':
+                            this.createKickDrum();
+                            break;
+                        case 'snare':
+                            this.createSnareDrum();
+                            break;
+                        case 'hihat':
+                            this.createHiHat();
+                            break;
+                    }
+                }
+            }
+
+            createPatternEditor() {
+                const drumTypes = ['kick', 'snare', 'hihat'];
+                
+                drumTypes.forEach(drumType => {
+                    const container = document.getElementById(`${drumType}Pattern`);
+                    container.innerHTML = '';
+                    
+                    for (let i = 0; i < 16; i++) {
+                        const toggle = document.createElement('div');
+                        toggle.className = `beat-toggle ${drumType}`;
+                        toggle.dataset.drum = drumType;
+                        toggle.dataset.beat = i;
+                        toggle.textContent = i + 1;
+                        
+                        if (this.drumPattern[drumType][i]) {
+                            toggle.classList.add('active');
+                        }
+                        
+                        toggle.addEventListener('click', () => this.toggleBeat(drumType, i));
+                        container.appendChild(toggle);
+                    }
+                });
+            }
+
+            toggleBeat(drumType, beatIndex) {
+                this.drumPattern[drumType][beatIndex] = this.drumPattern[drumType][beatIndex] ? 0 : 1;
+                this.updatePatternEditor();
+                this.createBeatIndicators();
+                this.saveAllSettings();
+            }
+
+            updatePatternEditor() {
+                const drumTypes = ['kick', 'snare', 'hihat'];
+                
+                drumTypes.forEach(drumType => {
+                    const container = document.getElementById(`${drumType}Pattern`);
+                    const toggles = container.querySelectorAll('.beat-toggle');
+                    
+                    toggles.forEach((toggle, index) => {
+                        if (this.drumPattern[drumType][index]) {
+                            toggle.classList.add('active');
+                        } else {
+                            toggle.classList.remove('active');
+                        }
+                    });
+                });
+            }
+
+            loadPreset(presetName) {
+                if (this.presets[presetName]) {
+                    this.drumPattern = {
+                        kick: [...this.presets[presetName].kick],
+                        snare: [...this.presets[presetName].snare],
+                        hihat: [...this.presets[presetName].hihat]
+                    };
+                    this.updatePatternEditor();
+                    this.createBeatIndicators();
+                    this.updateStatus(`Loaded ${presetName} pattern`);
+                    this.saveAllSettings();
+                }
+            }
+
+            createBeatIndicators() {
+                const patternContainer = document.getElementById('drumPattern');
+                patternContainer.innerHTML = '';
+                
+                for (let i = 0; i < 16; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'beat-indicator';
+                    indicator.id = `beat-${i}`;
+                    
+                    const classes = [];
+                    if (this.drumPattern.kick[i]) classes.push('kick');
+                    if (this.drumPattern.snare[i]) classes.push('snare');
+                    if (this.drumPattern.hihat[i]) classes.push('hihat');
+                    
+                    if (classes.length > 0) {
+                        indicator.className += ' ' + classes.join(' ');
+                        indicator.textContent = classes.map(c => c[0].toUpperCase()).join('');
+                    } else {
+                        indicator.textContent = '-';
+                    }
+                    
+                    patternContainer.appendChild(indicator);
+                }
+            }
+
+            setupBPMControl() {
+                const bpmSlider = document.getElementById('bpmSlider');
+                const bpmDisplay = document.getElementById('bpmDisplay');
+                
+                bpmSlider.addEventListener('input', (e) => {
+                    this.bpm = parseInt(e.target.value);
+                    bpmDisplay.textContent = `${this.bpm} BPM`;
+                    
+                    if (this.drumInterval) {
+                        this.stopDrumPattern();
+                        this.startDrumPattern();
+                    }
+                    
+                    this.saveAllSettings();
+                });
+            }
+
+            setupSilenceControl() {
+                const silenceSlider = document.getElementById('silenceSlider');
+                const silenceDisplay = document.getElementById('silenceDisplay');
+                
+                silenceSlider.addEventListener('input', (e) => {
+                    this.silenceProbability = parseInt(e.target.value);
+                    silenceDisplay.textContent = `${this.silenceProbability}%`;
+                    this.autoGeneratePreview();
+                    this.saveAllSettings();
+                });
+            }
+
+            setupVolumeControl() {
+                const volumeSlider = document.getElementById('volumeSlider');
+                volumeSlider.addEventListener('input', () => {
+                    this.saveAllSettings();
+                });
+            }
+
+            setupInputListeners() {
+                document.getElementById('minutesInput').addEventListener('input', () => {
+                    if (!this.isRunning) {
+                        const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+                        const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+                        this.timeRemaining = minutes * 60 + seconds;
+                        this.totalTime = this.timeRemaining;
+                        this.updateDisplay();
+                        this.autoGeneratePreview();
+                        this.saveAllSettings();
+                    }
+                });
+
+                document.getElementById('secondsInput').addEventListener('input', () => {
+                    if (!this.isRunning) {
+                        const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+                        const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+                        this.timeRemaining = minutes * 60 + seconds;
+                        this.totalTime = this.timeRemaining;
+                        this.updateDisplay();
+                        this.autoGeneratePreview();
+                        this.saveAllSettings();
+                    }
+                });
+            }
+
+            calculateTotalBars() {
+                const totalBeats = Math.ceil((this.totalTime * this.bpm) / 60);
+                return Math.ceil(totalBeats / 4);
+            }
+
+            autoGeneratePreview() {
+                const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+                const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+                const tempTotalTime = minutes * 60 + seconds;
+                
+                if (tempTotalTime > 0) {
+                    const originalTotalTime = this.totalTime;
+                    this.totalTime = tempTotalTime;
+                    this.generateSilencePattern();
+                    this.totalTime = originalTotalTime;
+                } else {
+                    const container = document.getElementById('barsContainer');
+                    const info = document.getElementById('timelineInfo');
+                    
+                    container.innerHTML = '';
+                    info.textContent = 'Set timer duration to see pattern';
+                }
+            }
+
+            generateSilencePattern() {
+                if (this.totalTime === 0) {
+                    const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+                    const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+                    const tempTotalTime = minutes * 60 + seconds;
+                    
+                    if (tempTotalTime === 0) {
+                        this.updateStatus('Please set a timer duration first');
+                        return;
+                    }
+                    
+                    this.totalTime = tempTotalTime;
+                }
+
+                this.totalBars = this.calculateTotalBars();
+                this.silentBars = [];
+
+                for (let i = 1; i < this.totalBars; i++) {
+                    if (Math.random() * 100 < this.silenceProbability) {
+                        this.silentBars.push(i);
+                    }
+                }
+
+                this.displayBarTimeline();
+                const silentCount = this.silentBars.length;
+                this.updateStatus(`Pattern: ${silentCount} silent bars out of ${this.totalBars} total`);
+            }
+
+            displayBarTimeline() {
+                const container = document.getElementById('barsContainer');
+                const info = document.getElementById('timelineInfo');
+                
+                container.innerHTML = '';
+
+                for (let i = 0; i < this.totalBars; i++) {
+                    const barDiv = document.createElement('div');
+                    barDiv.className = 'bar-indicator';
+                    barDiv.id = `bar-${i}`;
+                    barDiv.textContent = i + 1;
+                    
+                    if (this.silentBars.includes(i)) {
+                        barDiv.classList.add('silent');
+                        barDiv.title = `Bar ${i + 1}: Silent`;
+                    } else {
+                        barDiv.title = `Bar ${i + 1}: Playing`;
+                    }
+                    
+                    if (i === 0 && !this.isRunning) {
+                        barDiv.classList.add('current');
+                    }
+                    
+                    container.appendChild(barDiv);
+                }
+
+                const silentCount = this.silentBars.length;
+                const playingCount = this.totalBars - silentCount;
+                info.textContent = `${playingCount} playing, ${silentCount} silent (first bar always plays, last = gong 🔔)`;
+            }
+
+            updateBarDisplay() {
+                document.querySelectorAll('.bar-indicator').forEach((bar, index) => {
+                    bar.classList.remove('current', 'past');
+                    
+                    if (index === this.currentBar) {
+                        bar.classList.add('current');
+                        this.scrollToCurrentBar(bar);
+                    } else if (index < this.currentBar) {
+                        bar.classList.add('past');
+                    }
+                });
+                
+                if (this.currentBar === this.totalBars - 1 && this.isRunning) {
+                    this.playGong();
+                }
+            }
+
+            scrollToCurrentBar(currentBarElement) {
+                const container = document.getElementById('barsContainer');
+                if (!container || !currentBarElement) return;
+                
+                const containerRect = container.getBoundingClientRect();
+                const barRect = currentBarElement.getBoundingClientRect();
+                
+                const scrollTop = container.scrollTop;
+                const containerHeight = container.clientHeight;
+                const barTop = barRect.top - containerRect.top + scrollTop;
+                const barHeight = barRect.height;
+                
+                const targetScrollTop = barTop - (containerHeight / 2) + (barHeight / 2);
+                
+                container.scrollTop = Math.max(0, targetScrollTop);
+            }
+
+            // ========= SYNTHESIZED DRUM SOUNDS =========
+
+            createKickDrum() {
+                if (!this.audioContext) return;
+                const volume = document.getElementById('volumeSlider').value / 100;
+                
+                const kickOsc = this.audioContext.createOscillator();
+                const kickGain = this.audioContext.createGain();
+                
+                kickOsc.connect(kickGain);
+                kickGain.connect(this.audioContext.destination);
+                
+                kickOsc.frequency.setValueAtTime(80, this.audioContext.currentTime);
+                kickOsc.frequency.exponentialRampToValueAtTime(40, this.audioContext.currentTime + 0.1);
+                kickOsc.type = 'sine';
+                
+                kickGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                kickGain.gain.linearRampToValueAtTime(volume * 0.8, this.audioContext.currentTime + 0.01);
+                kickGain.gain.exponentialRampToValueAtTime(volume * 0.3, this.audioContext.currentTime + 0.05);
+                kickGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.4);
+                
+                kickOsc.start(this.audioContext.currentTime);
+                kickOsc.stop(this.audioContext.currentTime + 0.4);
+            }
+
+            createSnareDrum() {
+                if (!this.audioContext) return;
+                const volume = document.getElementById('volumeSlider').value / 100;
+                
+                const bufferSize = this.audioContext.sampleRate * 0.3;
+                const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+                const output = buffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                
+                const noise = this.audioContext.createBufferSource();
+                noise.buffer = buffer;
+                
+                const snareGain = this.audioContext.createGain();
+                noise.connect(snareGain);
+                snareGain.connect(this.audioContext.destination);
+                
+                snareGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                snareGain.gain.linearRampToValueAtTime(volume * 0.6, this.audioContext.currentTime + 0.005);
+                snareGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2);
+                
+                noise.start(this.audioContext.currentTime);
+                noise.stop(this.audioContext.currentTime + 0.3);
+            }
+
+            createHiHat() {
+                if (!this.audioContext) return;
+                const volume = document.getElementById('volumeSlider').value / 100;
+                
+                const bufferSize = this.audioContext.sampleRate * 0.1;
+                const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+                const output = buffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = (Math.random() * 2 - 1) * Math.sin(i * 0.01);
+                }
+                
+                const noise = this.audioContext.createBufferSource();
+                noise.buffer = buffer;
+                
+                const highpass = this.audioContext.createBiquadFilter();
+                highpass.type = 'highpass';
+                highpass.frequency.setValueAtTime(8000, this.audioContext.currentTime);
+                
+                const hihatGain = this.audioContext.createGain();
+                
+                noise.connect(highpass);
+                highpass.connect(hihatGain);
+                hihatGain.connect(this.audioContext.destination);
+                
+                hihatGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                hihatGain.gain.linearRampToValueAtTime(volume * 0.3, this.audioContext.currentTime + 0.001);
+                hihatGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.06);
+                
+                noise.start(this.audioContext.currentTime);
+                noise.stop(this.audioContext.currentTime + 0.1);
+            }
+
+            createGong() {
+                if (!this.audioContext) return;
+                const volume = document.getElementById('volumeSlider').value / 100;
+                
+                const frequencies = [200, 300, 400, 600, 800, 1200, 1600];
+                const oscillators = [];
+                
+                frequencies.forEach((freq, index) => {
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                    
+                    const harmonicVolume = volume * (0.8 / (index + 1)) * 0.3;
+                    
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(harmonicVolume, this.audioContext.currentTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 3.0);
+                    
+                    oscillators.push(osc);
+                });
+                
+                oscillators.forEach(osc => {
+                    osc.start(this.audioContext.currentTime);
+                    osc.stop(this.audioContext.currentTime + 3.0);
+                });
+            }
+
+            playGong() {
+                this.createGong();
+                this.updateStatus('🔔 Final bar - session ending!');
+            }
+
+            // ========= DRUM PATTERN PLAYBACK =========
+
+            playDrumsForBeat(beatIndex) {
+                const currentBarIndex = Math.floor(this.absoluteBeat / 16);
+                const isCurrentBarSilent = this.silentBars.includes(currentBarIndex);
+                
+                if (!isCurrentBarSilent) {
+                    if (this.drumPattern.kick[beatIndex]) {
+                        this.playDrumSample('kick');
+                    }
+                    if (this.drumPattern.snare[beatIndex]) {
+                        this.playDrumSample('snare');
+                    }
+                    if (this.drumPattern.hihat[beatIndex]) {
+                        this.playDrumSample('hihat');
+                    }
+                }
+                
+                this.updateBeatIndicator(beatIndex);
+                
+                const newBar = Math.floor(this.absoluteBeat / 16);
+                if (newBar !== this.currentBar) {
+                    this.currentBar = newBar;
+                    this.updateBarDisplay();
+                }
+            }
+
+            updateBeatIndicator(beatIndex) {
+                document.querySelectorAll('.beat-indicator').forEach(indicator => {
+                    indicator.classList.remove('active');
+                });
+                
+                const currentIndicator = document.getElementById(`beat-${beatIndex}`);
+                if (currentIndicator) {
+                    currentIndicator.classList.add('active');
+                }
+            }
+
+            startDrumPattern() {
+                if (!this.audioContext || this.drumInterval) return;
+                
+                const beatDuration = (60 / this.bpm / 4) * 1000;
+                
+                this.drumInterval = setInterval(() => {
+                    this.playDrumsForBeat(this.currentBeat);
+                    this.currentBeat = (this.currentBeat + 1) % 16;
+                    this.absoluteBeat++;
+                }, beatDuration);
+            }
+
+            stopDrumPattern() {
+                if (this.drumInterval) {
+                    clearInterval(this.drumInterval);
+                    this.drumInterval = null;
+                }
+                
+                document.querySelectorAll('.beat-indicator').forEach(indicator => {
+                    indicator.classList.remove('active');
+                });
+                
+                this.currentBeat = 0;
+            }
+
+            // ========= TIMER FUNCTIONALITY =========
+
+            updateDisplay() {
+                const minutes = Math.floor(this.timeRemaining / 60);
+                const seconds = this.timeRemaining % 60;
+                const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                const timerDisplay = document.getElementById('timerDisplay');
+                timerDisplay.textContent = display;
+                
+                if (this.timeRemaining <= 10 && this.timeRemaining > 0 && this.isRunning) {
+                    timerDisplay.classList.add('warning');
+                } else {
+                    timerDisplay.classList.remove('warning');
+                }
+                
+                if (this.totalTime > 0) {
+                    const progress = ((this.totalTime - this.timeRemaining) / this.totalTime) * 100;
+                    document.getElementById('progressFill').style.width = `${progress}%`;
+                }
+            }
+
+            updateStatus(message) {
+                document.getElementById('status').textContent = message;
+            }
+
+            updateButtons() {
+                const startBtn = document.getElementById('startBtn');
+                const pauseBtn = document.getElementById('pauseBtn');
+                
+                if (this.isRunning && !this.isPaused) {
+                    startBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    pauseBtn.textContent = 'Pause';
+                } else if (this.isPaused) {
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = false;
+                    pauseBtn.textContent = 'Resume';
+                    startBtn.textContent = 'Resume';
+                } else {
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    startBtn.textContent = 'Start';
+                    pauseBtn.textContent = 'Pause';
+                }
+            }
+
+            async start() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                }
+
+                if (!this.isPaused) {
+                    const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+                    const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+                    this.timeRemaining = minutes * 60 + seconds;
+                    this.totalTime = this.timeRemaining;
+                    
+                    this.absoluteBeat = 0;
+                    this.currentBar = 0;
+                    
+                    this.generateSilencePattern();
+                }
+
+                if (this.timeRemaining <= 0) {
+                    this.updateStatus('Please set a valid time');
+                    return;
+                }
+
+                this.isRunning = true;
+                this.isPaused = false;
+                this.updateButtons();
+                
+                const storedCount = this.getStoredSampleCount();
+                const message = storedCount > 0 
+                    ? `Running with ${storedCount} stored samples...`
+                    : 'Running with synthesized drums...';
+                this.updateStatus(message);
+                
+                this.startDrumPattern();
+
+                this.interval = setInterval(() => {
+                    this.timeRemaining--;
+                    this.updateDisplay();
+
+                    if (this.timeRemaining <= 0) {
+                        this.complete();
+                    }
+                }, 1000);
+            }
+
+            pause() {
+                if (this.isPaused) {
+                    this.start();
+                } else {
+                    this.isRunning = false;
+                    this.isPaused = true;
+                    clearInterval(this.interval);
+                    this.stopDrumPattern();
+                    this.updateButtons();
+                    this.updateStatus('Timer paused');
+                }
+            }
+
+            reset() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.timeRemaining = 0;
+                this.totalTime = 0;
+                this.currentBar = 0;
+                this.totalBars = 0;
+                this.absoluteBeat = 0;
+                this.silentBars = [];
+                clearInterval(this.interval);
+                this.stopDrumPattern();
+                this.updateDisplay();
+                this.updateButtons();
+                this.updateStatus('Timer reset');
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('timerDisplay').classList.remove('warning');
+                
+                this.autoGeneratePreview();
+            }
+
+            complete() {
+                this.isRunning = false;
+                this.isPaused = false;
+                clearInterval(this.interval);
+                this.stopDrumPattern();
+                this.updateButtons();
+                this.updateStatus('🎉 Drum session completed! 🔔');
+                
+                const display = document.getElementById('timerDisplay');
+                display.style.backgroundColor = 'rgba(255, 107, 107, 0.3)';
+                setTimeout(() => {
+                    display.style.backgroundColor = 'transparent';
+                }, 1000);
+            }
+
+            testDrum(type) {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                this.playDrumSample(type);
+            }
+        }
+
+        // ========= GLOBAL INSTANCE & FUNCTIONS =========
+
+        const drumTimer = new DrumTimerApp();
+
+        // Timer functions
+        function startTimer() {
+            drumTimer.start();
+        }
+
+        function pauseTimer() {
+            drumTimer.pause();
+        }
+
+        function resetTimer() {
+            drumTimer.reset();
+        }
+
+        function testDrum(type) {
+            drumTimer.testDrum(type);
+        }
+
+        function testGong() {
+            drumTimer.playGong();
+        }
+
+        // Pattern functions
+        function generateSilencePattern() {
+            drumTimer.generateSilencePattern();
+        }
+
+        function loadPreset(presetName) {
+            drumTimer.loadPreset(presetName);
+        }
+
+        function saveCustomPattern() {
+            drumTimer.saveCustomPattern();
+        }
+
+        // Settings functions
+        function saveAllSettings() {
+            drumTimer.saveAllSettings();
+        }
+
+        function loadAllSettings() {
+            drumTimer.loadAllSettings();
+        }
+
+        function resetAllSettings() {
+            drumTimer.resetAllSettings();
+        }
+
+        function exportSettings() {
+            drumTimer.exportSettings();
+        }
+
+        // Sample functions
+        async function handleSampleUpload(drumType, inputElement) {
+            const file = inputElement.files[0];
+            if (file) {
+                const success = await drumTimer.loadSampleFromFile(drumType, file);
+                if (success) {
+                    const count = drumTimer.getSampleCount();
+                    const storedCount = drumTimer.getStoredSampleCount();
+                    drumTimer.showTemporaryStatus(`✅ ${drumType} compressed & stored! (${storedCount}/3 stored)`, 'success');
+                } else {
+                    drumTimer.showTemporaryStatus(`❌ Failed to compress ${drumType} sample`, 'error');
+                }
+            }
+        }
+
+        function clearAllSamples() {
+            drumTimer.clearAllSamples();
+        }
+
+        function testAllSamples() {
+            drumTimer.testAllSamples();
+        }
+
+        function showStorageInfo() {
+            drumTimer.showStorageInfo();
+        }
+
+        // ========= EVENT LISTENERS =========
+
+        // Initialize audio context on first user interaction
+        document.addEventListener('click', async () => {
+            if (drumTimer.audioContext && drumTimer.audioContext.state === 'suspended') {
+                await drumTimer.audioContext.resume();
+            }
+        }, { once: true });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (drumTimer.isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            } else if (e.code === 'Escape') {
+                resetTimer();
+            }
+        });
+    </script>
+</body>
+</html>
