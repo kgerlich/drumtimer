@@ -761,6 +761,366 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Responsive Design */
+
+        /* Tablets and smaller desktops (768px - 1024px) */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+                padding: 1.5rem;
+            }
+
+            .main-grid {
+                gap: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .timer-display {
+                font-size: 2.5rem;
+            }
+
+            .bpm-display {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Mobile landscape and tablets portrait (481px - 768px) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                width: 98%;
+                border-radius: 16px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .timer-display {
+                font-size: 2rem;
+                margin: 0.3rem 0;
+            }
+
+            .time-input {
+                width: 50px;
+                font-size: 1rem;
+                padding: 0.4rem;
+            }
+
+            .time-label {
+                font-size: 0.75rem;
+            }
+
+            button {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .buttons {
+                gap: 0.8rem;
+            }
+
+            .bpm-display {
+                font-size: 1.2rem;
+            }
+
+            .beat-indicator {
+                height: 35px;
+                font-size: 0.7rem;
+            }
+
+            .drum-pattern {
+                gap: 3px;
+            }
+
+            .bar-indicator {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+
+            .bars-container {
+                max-height: 150px;
+            }
+
+            .pattern-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
+
+            .pattern-label {
+                width: 100%;
+            }
+
+            .pattern-beats {
+                max-width: 100%;
+            }
+
+            .beat-toggle {
+                height: 28px;
+                min-width: 22px;
+                max-width: 35px;
+                font-size: 0.65rem;
+            }
+
+            .upload-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .upload-label {
+                width: 100%;
+            }
+
+            .file-input {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .sample-status {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .pattern-presets,
+            .upload-controls,
+            .settings-row {
+                gap: 0.4rem;
+            }
+
+            .preset-btn,
+            .upload-btn,
+            .settings-btn {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.75rem;
+            }
+
+            .custom-pattern-save {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pattern-name-input {
+                width: 100%;
+            }
+
+            .drum-test-buttons {
+                gap: 0.4rem;
+                flex-wrap: wrap;
+            }
+
+            .drum-test-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            h3, h4 {
+                font-size: 0.95rem;
+            }
+
+            .status {
+                font-size: 0.9rem;
+            }
+
+            .silence-control,
+            .bar-timeline,
+            .pattern-editor,
+            .sample-upload,
+            .settings-panel {
+                padding: 0.6rem;
+            }
+        }
+
+        /* Mobile portrait (320px - 480px) */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.8rem;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .timer-display {
+                font-size: 1.8rem;
+            }
+
+            .time-input {
+                width: 45px;
+                font-size: 0.95rem;
+            }
+
+            button {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.5px;
+            }
+
+            .buttons {
+                gap: 0.6rem;
+                width: 100%;
+            }
+
+            .buttons button {
+                flex: 1;
+            }
+
+            .bpm-display {
+                font-size: 1.1rem;
+            }
+
+            .beat-indicator {
+                height: 30px;
+                font-size: 0.65rem;
+            }
+
+            .drum-pattern {
+                gap: 2px;
+            }
+
+            .bar-indicator {
+                width: 24px;
+                height: 24px;
+                font-size: 0.7rem;
+            }
+
+            .bars-container {
+                max-height: 120px;
+                gap: 3px;
+            }
+
+            .beat-toggle {
+                height: 26px;
+                min-width: 20px;
+                max-width: 32px;
+                font-size: 0.6rem;
+            }
+
+            .pattern-presets,
+            .upload-controls,
+            .settings-row {
+                gap: 0.3rem;
+            }
+
+            .preset-btn,
+            .upload-btn,
+            .settings-btn {
+                padding: 0.45rem 0.6rem;
+                font-size: 0.7rem;
+            }
+
+            .drum-test-buttons {
+                gap: 0.3rem;
+            }
+
+            .drum-test-btn {
+                padding: 0.45rem 0.7rem;
+                font-size: 0.8rem;
+            }
+
+            h3, h4 {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .status {
+                font-size: 0.85rem;
+                margin-top: 0.8rem;
+            }
+
+            .timeline-info {
+                font-size: 0.8rem;
+            }
+
+            .silence-probability {
+                gap: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .volume-control {
+                gap: 0.5rem;
+            }
+
+            .progress-bar {
+                height: 8px;
+            }
+
+            .silence-control,
+            .bar-timeline,
+            .pattern-editor,
+            .sample-upload,
+            .settings-panel {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Very small screens (below 360px) */
+        @media (max-width: 360px) {
+            .container {
+                padding: 0.6rem;
+            }
+
+            h1 {
+                font-size: 1rem;
+            }
+
+            .timer-display {
+                font-size: 1.5rem;
+            }
+
+            .time-input {
+                width: 40px;
+                font-size: 0.9rem;
+            }
+
+            button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .beat-indicator {
+                height: 28px;
+                font-size: 0.6rem;
+            }
+
+            .bar-indicator {
+                width: 22px;
+                height: 22px;
+                font-size: 0.65rem;
+            }
+
+            .beat-toggle {
+                height: 24px;
+                min-width: 18px;
+                max-width: 30px;
+            }
+
+            .bpm-display {
+                font-size: 1rem;
+            }
+
+            .preset-btn,
+            .upload-btn,
+            .settings-btn,
+            .drum-test-btn {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.65rem;
+            }
+        }
     </style>
 </head>
 <body>
