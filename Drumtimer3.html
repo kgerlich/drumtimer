@@ -354,10 +354,24 @@
             background: rgba(255, 107, 107, 0.6);
         }
 
+        .bar-indicator.silent.group-start {
+            border-left: 3px solid #ff3030;
+            margin-left: 2px;
+        }
+
+        .bar-indicator.silent.group-end {
+            border-right: 3px solid #ff3030;
+            margin-right: 2px;
+        }
+
+        .bar-indicator.silent.single-group {
+            border: 3px solid #ff3030;
+        }
+
         .bar-indicator.current {
             transform: scale(1.2);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-            border: 3px solid white;
+            border: 3px solid white !important;
             z-index: 10;
         }
 
@@ -1727,14 +1741,18 @@
                 this.totalBars = this.calculateTotalBars();
                 this.silentBars = [];
 
+                // Ensure silenceBarLength is a number
+                const pauseLength = parseInt(this.silenceBarLength) || 1;
+
                 // Generate silent bar groups
                 for (let i = 1; i < this.totalBars; ) {
                     if (Math.random() * 100 < this.silenceProbability) {
-                        // Add consecutive silent bars based on silenceBarLength
-                        for (let j = 0; j < this.silenceBarLength && (i + j) < this.totalBars; j++) {
+                        // Add consecutive silent bars based on pauseLength
+                        for (let j = 0; j < pauseLength && (i + j) < this.totalBars; j++) {
                             this.silentBars.push(i + j);
                         }
-                        i += this.silenceBarLength; // Skip ahead by the pause length
+                        // Skip ahead by pause length + 1 to ensure at least one playing bar between groups
+                        i += pauseLength + 1;
                     } else {
                         i++; // Move to next bar
                     }
@@ -1742,13 +1760,26 @@
 
                 this.displayBarTimeline();
                 const silentCount = this.silentBars.length;
-                this.updateStatus(`Pattern: ${silentCount} silent bars out of ${this.totalBars} total`);
+                const groupCount = this.countSilentGroups();
+                this.updateStatus(`Pattern: ${silentCount} silent bars in ${groupCount} groups out of ${this.totalBars} total (pause length: ${pauseLength})`);
+            }
+
+            countSilentGroups() {
+                if (this.silentBars.length === 0) return 0;
+
+                let groups = 1;
+                for (let i = 1; i < this.silentBars.length; i++) {
+                    if (this.silentBars[i] !== this.silentBars[i-1] + 1) {
+                        groups++;
+                    }
+                }
+                return groups;
             }
 
             displayBarTimeline() {
                 const container = document.getElementById('barsContainer');
                 const info = document.getElementById('timelineInfo');
-                
+
                 container.innerHTML = '';
 
                 for (let i = 0; i < this.totalBars; i++) {
@@ -1756,24 +1787,45 @@
                     barDiv.className = 'bar-indicator';
                     barDiv.id = `bar-${i}`;
                     barDiv.textContent = i + 1;
-                    
+
                     if (this.silentBars.includes(i)) {
                         barDiv.classList.add('silent');
-                        barDiv.title = `Bar ${i + 1}: Silent`;
+
+                        // Check if this bar is at the start or end of a silent group
+                        const isStart = !this.silentBars.includes(i - 1);
+                        const isEnd = !this.silentBars.includes(i + 1);
+
+                        if (isStart && isEnd) {
+                            // Single bar group
+                            barDiv.classList.add('single-group');
+                            barDiv.title = `Bar ${i + 1}: Silent (standalone)`;
+                        } else if (isStart) {
+                            // Start of a multi-bar group
+                            barDiv.classList.add('group-start');
+                            barDiv.title = `Bar ${i + 1}: Silent (group start)`;
+                        } else if (isEnd) {
+                            // End of a multi-bar group
+                            barDiv.classList.add('group-end');
+                            barDiv.title = `Bar ${i + 1}: Silent (group end)`;
+                        } else {
+                            // Middle of a group
+                            barDiv.title = `Bar ${i + 1}: Silent (in group)`;
+                        }
                     } else {
                         barDiv.title = `Bar ${i + 1}: Playing`;
                     }
-                    
+
                     if (i === 0 && !this.isRunning) {
                         barDiv.classList.add('current');
                     }
-                    
+
                     container.appendChild(barDiv);
                 }
 
                 const silentCount = this.silentBars.length;
                 const playingCount = this.totalBars - silentCount;
-                info.textContent = `${playingCount} playing, ${silentCount} silent (first bar always plays, last = gong 🔔)`;
+                const groupCount = this.countSilentGroups();
+                info.textContent = `${playingCount} playing, ${silentCount} silent in ${groupCount} groups (first bar always plays, last = gong 🔔)`;
             }
 
             updateBarDisplay() {
