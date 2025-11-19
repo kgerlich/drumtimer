@@ -4,51 +4,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a single-file web application called "Drum Timer" - a browser-based timer with an integrated drum machine for meditation, practice sessions, or timed activities. The entire application is contained in `Drumtimer3.html` as a self-contained HTML file with embedded CSS and JavaScript.
+This is a single-file web application called "Drum Timer" - a browser-based timer with an integrated drum machine for meditation, practice sessions, or timed activities. The entire application is contained in `index.html` as a self-contained HTML file with embedded CSS and JavaScript.
 
 ## Core Architecture
 
 ### Single-File Structure
-- **HTML/CSS/JS**: All code exists in one file (`Drumtimer3.html`)
+- **HTML/CSS/JS**: All code exists in one file (`index.html`)
 - **No build process**: Open the HTML file directly in a browser to run
 - **No dependencies**: Pure vanilla JavaScript with Web Audio API
 
 ### Main Components
 
-**DrumTimerApp Class** (line 821)
+**DrumTimerApp Class** (line 1409)
 The central application class that manages all functionality:
 
-1. **Timer System** (lines 1965-2103)
+1. **Timer System** (lines 2694-2781)
    - Countdown timer with minutes/seconds input
    - Start/pause/reset functionality
    - Progress bar visualization
 
-2. **Drum Machine** (lines 1475-1963)
+2. **Drum Machine** (lines 2070-2630)
    - 16-step sequencer (16th notes in 4/4 time)
    - Three drum tracks: kick, snare, hi-hat
    - Pattern editor with visual beat toggles
    - BPM control (60-200 BPM)
    - Preset patterns: Basic Rock, Disco, Funk, Reggae
 
-3. **Audio System** (lines 1475-1895)
+3. **Audio System** (lines 2436-2552)
    - Web Audio API for sound generation
    - Two sound modes:
      - Synthesized drums (generated algorithmically)
      - Custom uploaded samples (user WAV/MP3/OGG files)
 
-4. **Sample Compression & Storage** (lines 909-1159)
+4. **Sample Compression & Storage** (lines 1500-1700)
    - Compresses uploaded audio to 16-bit PCM at 22kHz mono
    - Stores samples in localStorage as base64
    - Shows compression ratio and storage info
    - Automatic sample loading on page load
 
-5. **Silent Bar System** (lines 1687-1778)
+5. **Silent Bar System** (lines 2311-2400)
    - Generates random pattern of silent bars
    - First bar always plays (timing reference)
    - Last bar triggers a "gong" sound
    - Configurable probability slider (0-50%)
 
-6. **Settings Persistence** (lines 1160-1409)
+6. **Settings Persistence** (lines 1750-1900)
    - Saves/loads all settings to localStorage
    - Exports complete configuration as JSON
    - Custom pattern save/delete functionality
@@ -56,16 +56,16 @@ The central application class that manages all functionality:
 ## Key Technical Details
 
 ### Audio Compression Flow
-1. User uploads audio file → `handleSampleUpload()` (line 2168)
-2. File converted to ArrayBuffer → `compressAudioData()` (line 911)
+1. User uploads audio file → `handleSampleUpload()` (line 2824)
+2. File converted to ArrayBuffer → `compressAudioData()` (line 1500)
 3. Downsampled to 22kHz mono, converted to 16-bit PCM
 4. Encoded as base64 and saved to localStorage
-5. On page load: `loadStoredSamples()` (line 1084) decompresses and restores audio
+5. On page load: `loadStoredSamples()` (line 1673) decompresses and restores audio
 
 ### Pattern Playback Logic
-- Beat duration calculated from BPM: `(60 / BPM / 4) * 1000` ms (line 1943)
-- 16-step pattern loops continuously (line 1945)
-- Bar tracking: Every 16 beats = 1 bar (line 1922)
+- Beat duration calculated from BPM: `(60 / BPM / 4) * 1000` ms
+- 16-step pattern loops continuously via `setInterval` (line 2599)
+- Bar tracking: Every 16 beats = 1 bar
 - Silent bars skip audio playback but continue visual animation
 
 ### LocalStorage Keys
@@ -75,10 +75,10 @@ The central application class that manages all functionality:
 ## Common Development Tasks
 
 ### Testing the Application
-Simply open `Drumtimer3.html` in a modern web browser (Chrome, Firefox, Edge, Safari).
+Simply open `index.html` in a modern web browser (Chrome, Firefox, Edge, Safari).
 
 ### Modifying Drum Patterns
-Edit the preset objects in the `presets` property (lines 867-893):
+Edit the preset objects in the `presets` property (line 1456):
 ```javascript
 presets = {
     basic: {
@@ -91,13 +91,13 @@ presets = {
 
 ### Adjusting Audio Synthesis
 Synthesized drum sounds are in:
-- `createKickDrum()` (line 1782) - sine wave with frequency sweep
-- `createSnareDrum()` (line 1805) - white noise burst
-- `createHiHat()` (line 1832) - filtered noise with high-pass at 8kHz
-- `createGong()` (line 1865) - multiple sine harmonics (200-1600Hz)
+- `createKickDrum()` (line 2436) - sine wave with frequency sweep
+- `createSnareDrum()` (line 2459) - white noise burst
+- `createHiHat()` (line 2486) - filtered noise with high-pass at 8kHz
+- `createGong()` (line 2519) - multiple sine harmonics (200-1600Hz)
 
 ### Modifying Compression Settings
-In `compressAudioData()` (line 911), change:
+In `compressAudioData()` (line 1500), change:
 - `targetSampleRate` (currently 22050 Hz) - lower = more compression
 - `targetChannels` (currently 1 for mono) - stereo would be 2
 
@@ -105,12 +105,12 @@ In `compressAudioData()` (line 911), change:
 
 ### Browser Compatibility
 - Requires Web Audio API support (all modern browsers)
-- AudioContext may be suspended until user interaction (line 2197)
+- AudioContext may be suspended until user interaction
 - LocalStorage has ~5-10MB limit per domain
 
 ### Performance Notes
-- Timer uses `setInterval` at 1-second intervals (line 2046)
-- Drum pattern uses `setInterval` at beat intervals (line 1945)
+- Timer uses `setInterval` at 1-second intervals (line 2694)
+- Drum pattern uses `setInterval` at beat intervals (line 2599)
 - All audio samples must fit in localStorage after compression
 
 ### State Management

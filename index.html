@@ -2310,18 +2310,20 @@
                 this.totalBars = this.calculateTotalBars();
                 this.silentBars = [];
 
-                // Ensure silenceBarLength is a number
-                const pauseLength = parseInt(this.silenceBarLength) || 1;
+                // Ensure silenceBarLength is a number (now used as maximum)
+                const maxPauseLength = parseInt(this.silenceBarLength) || 1;
 
                 // Generate silent bar groups
                 for (let i = 1; i < this.totalBars; ) {
                     if (Math.random() * 100 < this.silenceProbability) {
-                        // Add consecutive silent bars based on pauseLength
-                        for (let j = 0; j < pauseLength && (i + j) < this.totalBars; j++) {
+                        // Generate random pause length from 1 to maxPauseLength
+                        const actualPauseLength = Math.floor(Math.random() * maxPauseLength) + 1;
+                        // Add consecutive silent bars based on random pause length
+                        for (let j = 0; j < actualPauseLength && (i + j) < this.totalBars; j++) {
                             this.silentBars.push(i + j);
                         }
-                        // Skip ahead by pause length + 1 to ensure at least one playing bar between groups
-                        i += pauseLength + 1;
+                        // Skip ahead by actual pause length + 1 to ensure at least one playing bar between groups
+                        i += actualPauseLength + 1;
                     } else {
                         i++; // Move to next bar
                     }
@@ -2330,7 +2332,7 @@
                 this.displayBarTimeline();
                 const silentCount = this.silentBars.length;
                 const groupCount = this.countSilentGroups();
-                this.updateStatus(`Pattern: ${silentCount} silent bars in ${groupCount} groups out of ${this.totalBars} total (pause length: ${pauseLength})`);
+                this.updateStatus(`Pattern: ${silentCount} silent bars in ${groupCount} groups out of ${this.totalBars} total (max pause: ${maxPauseLength})`);
             }
 
             countSilentGroups() {
