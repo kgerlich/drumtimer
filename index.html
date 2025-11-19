@@ -1384,8 +1384,8 @@
 
                 <div class="volume-control">
                     <span>Shuffle:</span>
-                    <input type="range" class="volume-slider" id="shuffleSlider" min="50" max="75" value="50">
-                    <span id="shuffleDisplay">50%</span>
+                    <input type="range" class="volume-slider" id="shuffleSlider" min="0" max="100" value="0">
+                    <span id="shuffleDisplay">0%</span>
                 </div>
                 
                 <div class="drum-test-buttons">
@@ -1429,7 +1429,7 @@
                 this.silentBars = [];
                 this.silenceProbability = 10;
                 this.silenceBarLength = 1;
-                this.shuffle = 50;
+                this.shuffle = 0;
                 
                 // Audio buffers for real samples
                 this.drumBuffers = {
@@ -1851,12 +1851,12 @@
                     this.bpm = 80;
                     this.silenceProbability = 10;
                     this.silenceBarLength = 1;
-                    this.shuffle = 50;
+                    this.shuffle = 0;
                     document.getElementById('bpmSlider').value = 80;
                     document.getElementById('bpmDisplay').textContent = '80 BPM';
                     document.getElementById('volumeSlider').value = 70;
-                    document.getElementById('shuffleSlider').value = 50;
-                    document.getElementById('shuffleDisplay').textContent = '50%';
+                    document.getElementById('shuffleSlider').value = 0;
+                    document.getElementById('shuffleDisplay').textContent = '0%';
                     document.getElementById('silenceSlider').value = 10;
                     document.getElementById('silenceDisplay').textContent = '10%';
                     document.getElementById('pauseLengthSlider').value = 1;
@@ -2631,9 +2631,9 @@
                     this.playDrumsForBeat(this.currentBeat);
 
                     // Calculate duration based on shuffle
-                    // Shuffle 50% = straight, 75% = heavy swing
+                    // Shuffle 0% = straight, 100% = heavy swing
                     // Odd beats (0,2,4...) are short, even beats (1,3,5...) are long
-                    const shuffleRatio = this.shuffle / 50;
+                    const shuffleRatio = 1 + (this.shuffle / 100) * 0.5;
                     const isOddBeat = this.currentBeat % 2 === 0;
                     const duration = isOddBeat
                         ? baseBeatDuration * (2 - shuffleRatio)
