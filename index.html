@@ -2632,12 +2632,13 @@
 
                     // Calculate duration based on shuffle
                     // Shuffle 0% = straight, 100% = heavy swing
-                    // Odd beats (0,2,4...) are short, even beats (1,3,5...) are long
+                    // After odd beats (0,2,4...) wait LONG to delay the next even beat
+                    // After even beats (1,3,5...) wait SHORT to bring next odd beat closer
                     const shuffleRatio = 1 + (this.shuffle / 100) * 0.5;
                     const isOddBeat = this.currentBeat % 2 === 0;
                     const duration = isOddBeat
-                        ? baseBeatDuration * (2 - shuffleRatio)
-                        : baseBeatDuration * shuffleRatio;
+                        ? baseBeatDuration * shuffleRatio
+                        : baseBeatDuration * (2 - shuffleRatio);
 
                     this.currentBeat = (this.currentBeat + 1) % 16;
                     this.absoluteBeat++;
