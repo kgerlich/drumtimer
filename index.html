@@ -449,7 +449,23 @@
         }
 
         .bar-indicator.past {
-            opacity: 0.5;
+            opacity: 0.1;
+        }
+
+        .bar-indicator.tempo-change {
+            border: 2px solid #007AFF;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.3), rgba(0, 122, 255, 0.1));
+            position: relative;
+        }
+
+        .bar-indicator.tempo-change::after {
+            content: '♪';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 14px;
+            color: #007AFF;
+            font-weight: bold;
         }
 
         .pattern-editor {
@@ -1387,6 +1403,38 @@
                     <input type="range" class="volume-slider" id="shuffleSlider" min="0" max="100" value="0">
                     <span id="shuffleDisplay">0%</span>
                 </div>
+
+                <div class="silence-control" style="margin-top: 1rem;">
+                    <h4 style="text-align: center; margin-bottom: 0.5rem; color: #007AFF;">🎵 Tempo Changes</h4>
+
+                    <div class="silence-probability">
+                        <span>Enable:</span>
+                        <input type="checkbox" id="tempoChangesCheckbox" style="width: 20px; height: 20px;">
+                        <span id="tempoChangesStatus">Disabled</span>
+                    </div>
+
+                    <div class="silence-probability" style="margin-top: 0.5rem;">
+                        <span>Changes:</span>
+                        <input type="range" class="silence-slider" id="tempoChangesSlider" min="0" max="10" value="3">
+                        <span id="tempoChangesDisplay">3</span>
+                    </div>
+
+                    <div class="silence-probability" style="margin-top: 0.5rem;">
+                        <span>Min BPM:</span>
+                        <input type="range" class="silence-slider" id="minBPMSlider" min="60" max="200" value="60">
+                        <span id="minBPMDisplay">60</span>
+                    </div>
+
+                    <div class="silence-probability" style="margin-top: 0.5rem;">
+                        <span>Max BPM:</span>
+                        <input type="range" class="silence-slider" id="maxBPMSlider" min="60" max="200" value="120">
+                        <span id="maxBPMDisplay">120</span>
+                    </div>
+
+                    <div style="font-size: 0.75rem; text-align: center; margin-top: 0.5rem; opacity: 0.8;">
+                        Tempo changes evenly from min to max, 2-bar gaps
+                    </div>
+                </div>
                 
                 <div class="drum-test-buttons">
                     <button class="btn-primary drum-test-btn" onclick="testDrum('kick')">Kick</button>
@@ -1430,6 +1478,17 @@
                 this.silenceProbability = 10;
                 this.silenceBarLength = 1;
                 this.shuffle = 0;
+
+                // Tempo change settings
+                this.tempoChangesEnabled = false;
+                this.numTempoChanges = 3;
+                this.minBPM = 60;
+                this.maxBPM = 120;
+
+                // Tempo change tracking
+                this.tempoChangeBars = [];
+                this.tempoAtBar = [];
+                this.currentTempoBPM = this.bpm;
                 
                 // Audio buffers for real samples
                 this.drumBuffers = {
@@ -1497,6 +1556,7 @@
                 this.setupSilenceControl();
                 this.setupVolumeControl();
                 this.setupShuffleControl();
+                this.setupTempoChangesControl();
                 this.setupInputListeners();
                 this.loadCustomPatterns(); // Load and display custom patterns
                 this.loadStoredSamples(); // Load stored audio samples
@@ -1764,6 +1824,10 @@
                         shuffle: this.shuffle,
                         silenceProbability: this.silenceProbability,
                         silenceBarLength: this.silenceBarLength,
+                        tempoChangesEnabled: this.tempoChangesEnabled,
+                        numTempoChanges: this.numTempoChanges,
+                        minBPM: this.minBPM,
+                        maxBPM: this.maxBPM,
                         defaultMinutes: document.getElementById('minutesInput').value,
                         defaultSeconds: document.getElementById('secondsInput').value,
                         drumPattern: this.drumPattern,
@@ -1818,6 +1882,31 @@
                         document.getElementById('pauseLengthDisplay').textContent = `${this.silenceBarLength} bar${this.silenceBarLength > 1 ? 's' : ''}`;
                     }
 
+                    if (settings.tempoChangesEnabled !== undefined) {
+                        this.tempoChangesEnabled = settings.tempoChangesEnabled;
+                        document.getElementById('tempoChangesCheckbox').checked = this.tempoChangesEnabled;
+                        document.getElementById('tempoChangesStatus').textContent =
+                            this.tempoChangesEnabled ? 'Enabled' : 'Disabled';
+                    }
+
+                    if (settings.numTempoChanges !== undefined) {
+                        this.numTempoChanges = settings.numTempoChanges;
+                        document.getElementById('tempoChangesSlider').value = this.numTempoChanges;
+                        document.getElementById('tempoChangesDisplay').textContent = this.numTempoChanges.toString();
+                    }
+
+                    if (settings.minBPM !== undefined) {
+                        this.minBPM = settings.minBPM;
+                        document.getElementById('minBPMSlider').value = this.minBPM;
+                        document.getElementById('minBPMDisplay').textContent = `${this.minBPM}`;
+                    }
+
+                    if (settings.maxBPM !== undefined) {
+                        this.maxBPM = settings.maxBPM;
+                        document.getElementById('maxBPMSlider').value = this.maxBPM;
+                        document.getElementById('maxBPMDisplay').textContent = `${this.maxBPM}`;
+                    }
+
                     if (settings.defaultMinutes) {
                         document.getElementById('minutesInput').value = settings.defaultMinutes;
                     }
@@ -1852,6 +1941,12 @@
                     this.silenceProbability = 10;
                     this.silenceBarLength = 1;
                     this.shuffle = 0;
+                    
+                    this.tempoChangesEnabled = false;
+                    this.numTempoChanges = 3;
+                    this.minBPM = 60;
+                    this.maxBPM = 120;
+                    
                     document.getElementById('bpmSlider').value = 80;
                     document.getElementById('bpmDisplay').textContent = '80 BPM';
                     document.getElementById('volumeSlider').value = 70;
@@ -1861,6 +1956,16 @@
                     document.getElementById('silenceDisplay').textContent = '10%';
                     document.getElementById('pauseLengthSlider').value = 1;
                     document.getElementById('pauseLengthDisplay').textContent = '1 bar';
+                    
+                    document.getElementById('tempoChangesCheckbox').checked = false;
+                    document.getElementById('tempoChangesStatus').textContent = 'Disabled';
+                    document.getElementById('tempoChangesSlider').value = 3;
+                    document.getElementById('tempoChangesDisplay').textContent = '3';
+                    document.getElementById('minBPMSlider').value = 60;
+                    document.getElementById('minBPMDisplay').textContent = '60';
+                    document.getElementById('maxBPMSlider').value = 120;
+                    document.getElementById('maxBPMDisplay').textContent = '120';
+                    
                     document.getElementById('minutesInput').value = 5;
                     document.getElementById('secondsInput').value = 0;
                     
@@ -1905,6 +2010,10 @@
                         shuffle: this.shuffle,
                         silenceProbability: this.silenceProbability,
                         silenceBarLength: this.silenceBarLength,
+                        tempoChangesEnabled: this.tempoChangesEnabled,
+                        numTempoChanges: this.numTempoChanges,
+                        minBPM: this.minBPM,
+                        maxBPM: this.maxBPM,
                         defaultMinutes: document.getElementById('minutesInput').value,
                         defaultSeconds: document.getElementById('secondsInput').value,
                         drumPattern: this.drumPattern,
@@ -2272,6 +2381,55 @@
                 });
             }
 
+            setupTempoChangesControl() {
+                const checkbox = document.getElementById('tempoChangesCheckbox');
+                const status = document.getElementById('tempoChangesStatus');
+                const changesSlider = document.getElementById('tempoChangesSlider');
+                const changesDisplay = document.getElementById('tempoChangesDisplay');
+                const minSlider = document.getElementById('minBPMSlider');
+                const minDisplay = document.getElementById('minBPMDisplay');
+                const maxSlider = document.getElementById('maxBPMSlider');
+                const maxDisplay = document.getElementById('maxBPMDisplay');
+
+                checkbox.addEventListener('change', () => {
+                    this.tempoChangesEnabled = checkbox.checked;
+                    status.textContent = this.tempoChangesEnabled ? 'Enabled' : 'Disabled';
+                    this.autoGeneratePreview();
+                    this.saveAllSettings();
+                });
+
+                changesSlider.addEventListener('input', () => {
+                    this.numTempoChanges = parseInt(changesSlider.value);
+                    changesDisplay.textContent = this.numTempoChanges.toString();
+                    this.autoGeneratePreview();
+                    this.saveAllSettings();
+                });
+
+                minSlider.addEventListener('input', () => {
+                    this.minBPM = parseInt(minSlider.value);
+                    minDisplay.textContent = `${this.minBPM}`;
+                    if (this.minBPM > this.maxBPM) {
+                        this.maxBPM = this.minBPM;
+                        maxSlider.value = this.maxBPM;
+                        maxDisplay.textContent = `${this.maxBPM}`;
+                    }
+                    this.autoGeneratePreview();
+                    this.saveAllSettings();
+                });
+
+                maxSlider.addEventListener('input', () => {
+                    this.maxBPM = parseInt(maxSlider.value);
+                    maxDisplay.textContent = `${this.maxBPM}`;
+                    if (this.maxBPM < this.minBPM) {
+                        this.minBPM = this.maxBPM;
+                        minSlider.value = this.minBPM;
+                        minDisplay.textContent = `${this.minBPM}`;
+                    }
+                    this.autoGeneratePreview();
+                    this.saveAllSettings();
+                });
+            }
+
             setupInputListeners() {
                 document.getElementById('minutesInput').addEventListener('input', () => {
                     if (!this.isRunning) {
@@ -2312,6 +2470,7 @@
                     const originalTotalTime = this.totalTime;
                     this.totalTime = tempTotalTime;
                     this.generateSilencePattern();
+                    this.generateTempoChanges();
                     this.totalTime = originalTotalTime;
                 } else {
                     const container = document.getElementById('barsContainer');
@@ -2376,6 +2535,63 @@
                 return groups;
             }
 
+            generateTempoChanges() {
+                // Reset
+                this.tempoChangeBars = [];
+                this.tempoAtBar = [];
+
+                if (!this.tempoChangesEnabled || this.numTempoChanges === 0) {
+                    this.tempoAtBar = new Array(this.totalBars).fill(this.minBPM);
+                    return;
+                }
+
+                // Ensure min <= max
+                let min = Math.min(this.minBPM, this.maxBPM);
+                let max = Math.max(this.minBPM, this.maxBPM);
+
+                // Calculate even steps: 60-120 with 3 changes = [60, 90, 120]
+                const bpmStep = (max - min) / this.numTempoChanges;
+
+                // Get non-silent bars
+                const eligibleBars = [];
+                for (let i = 0; i < this.totalBars; i++) {
+                    if (!this.silentBars.includes(i)) {
+                        eligibleBars.push(i);
+                    }
+                }
+
+                if (eligibleBars.length === 0) {
+                    this.tempoAtBar = new Array(this.totalBars).fill(min);
+                    return;
+                }
+
+                // Distribute changes with 2-bar minimum gap
+                const segmentSize = Math.floor(eligibleBars.length / (this.numTempoChanges + 1));
+
+                for (let i = 0; i <= this.numTempoChanges; i++) {
+                    const barIndex = eligibleBars[Math.min(i * segmentSize, eligibleBars.length - 1)];
+                    const bpm = min + (i * bpmStep);
+
+                    this.tempoChangeBars.push(barIndex);
+
+                    // Fill tempoAtBar for all bars until next change
+                    const nextBarIndex = (i < this.numTempoChanges)
+                        ? eligibleBars[(i + 1) * segmentSize]
+                        : this.totalBars;
+
+                    for (let bar = barIndex; bar < nextBarIndex; bar++) {
+                        this.tempoAtBar[bar] = Math.round(bpm);
+                    }
+                }
+
+                // Fill remaining bars with max tempo
+                for (let bar = 0; bar < this.totalBars; bar++) {
+                    if (this.tempoAtBar[bar] === undefined) {
+                        this.tempoAtBar[bar] = max;
+                    }
+                }
+            }
+
             displayBarTimeline() {
                 const container = document.getElementById('barsContainer');
                 const info = document.getElementById('timelineInfo');
@@ -2387,6 +2603,13 @@
                     barDiv.className = 'bar-indicator';
                     barDiv.id = `bar-${i}`;
                     barDiv.textContent = i + 1;
+
+                    // Add tempo change indicator
+                    if (this.tempoChangesEnabled && this.tempoChangeBars.includes(i)) {
+                        barDiv.classList.add('tempo-change');
+                        const bpm = this.tempoAtBar[i];
+                        barDiv.title = `Bar ${i + 1}: Tempo Change to ${bpm} BPM`;
+                    }
 
                     if (this.silentBars.includes(i)) {
                         barDiv.classList.add('silent');
@@ -2425,7 +2648,12 @@
                 const silentCount = this.silentBars.length;
                 const playingCount = this.totalBars - silentCount;
                 const groupCount = this.countSilentGroups();
-                info.textContent = `${playingCount} playing, ${silentCount} silent in ${groupCount} groups (first bar always plays, last = gong 🔔)`;
+                
+                if (this.tempoChangesEnabled && this.tempoChangeBars.length > 0) {
+                    info.textContent = `${playingCount} playing, ${silentCount} silent | Tempo: ${this.minBPM}-${this.maxBPM} BPM (${this.tempoChangeBars.length} changes)`;
+                } else {
+                    info.textContent = `${playingCount} playing, ${silentCount} silent in ${groupCount} groups (first bar always plays, last = gong 🔔)`;
+                }
             }
 
             updateBarDisplay() {
@@ -2588,6 +2816,16 @@
 
             playDrumsForBeat(beatIndex) {
                 const currentBarIndex = Math.floor(this.absoluteBeat / 16);
+
+                // Check for tempo change at start of bar
+                if (this.tempoChangesEnabled && beatIndex === 0) {
+                    const newBPM = this.tempoAtBar[currentBarIndex];
+                    if (newBPM && newBPM !== this.currentTempoBPM) {
+                        this.currentTempoBPM = newBPM;
+                        document.getElementById('bpmDisplay').textContent = `${this.currentTempoBPM} BPM`;
+                    }
+                }
+
                 const isCurrentBarSilent = this.silentBars.includes(currentBarIndex);
                 
                 if (!isCurrentBarSilent) {
@@ -2625,10 +2863,18 @@
             startDrumPattern() {
                 if (!this.audioContext || this.drumInterval) return;
 
-                const baseBeatDuration = (60 / this.bpm / 4) * 1000;
+                // Initialize current tempo
+                if (this.tempoChangesEnabled && this.tempoAtBar.length > 0) {
+                    this.currentTempoBPM = this.tempoAtBar[0] || this.minBPM;
+                } else {
+                    this.currentTempoBPM = this.bpm;
+                }
 
                 const playNextBeat = () => {
                     this.playDrumsForBeat(this.currentBeat);
+
+                    // Calculate beat duration using current tempo (not this.bpm)
+                    const baseBeatDuration = (60 / this.currentTempoBPM / 4) * 1000;
 
                     // Calculate duration based on shuffle
                     // Shuffle 0% = straight, 100% = heavy swing
@@ -2718,6 +2964,7 @@
                     this.currentBar = 0;
                     
                     this.generateSilencePattern();
+                    this.generateTempoChanges();
                 }
 
                 if (this.timeRemaining <= 0) {
